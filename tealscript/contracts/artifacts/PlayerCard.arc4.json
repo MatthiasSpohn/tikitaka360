@@ -1,0 +1,112 @@
+{
+  "name": "PlayerCard",
+  "desc": "",
+  "methods": [
+    {
+      "name": "createApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "optInToToken",
+      "args": [
+        {
+          "name": "asset",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "optInToApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "createNFT",
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "unitName",
+          "type": "string"
+        },
+        {
+          "name": "url",
+          "type": "string"
+        },
+        {
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "name": "reserve",
+          "type": "address"
+        },
+        {
+          "name": "total",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
+      "name": "setNewReview",
+      "args": [
+        {
+          "name": "newUserReview",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
+      "name": "assetOptIn",
+      "args": [
+        {
+          "name": "txn",
+          "type": "axfer"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "tokenOptIn",
+      "args": [
+        {
+          "name": "txn",
+          "type": "axfer"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "purchaseNft",
+      "args": [
+        {
+          "name": "payment",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    }
+  ]
+}

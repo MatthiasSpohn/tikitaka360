@@ -1,0 +1,149 @@
+{
+  "name": "Challenge",
+  "desc": "",
+  "methods": [
+    {
+      "name": "bootstrap",
+      "args": [],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
+      "name": "mintAndGetApp",
+      "args": [
+        {
+          "name": "name",
+          "type": "string"
+        },
+        {
+          "name": "unitName",
+          "type": "string"
+        },
+        {
+          "name": "url",
+          "type": "string"
+        },
+        {
+          "name": "manager",
+          "type": "address"
+        },
+        {
+          "name": "reserve",
+          "type": "address"
+        },
+        {
+          "name": "total",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "uint64"
+      }
+    },
+    {
+      "name": "fundFactoryApp",
+      "args": [
+        {
+          "name": "address",
+          "type": "address"
+        },
+        {
+          "name": "appid",
+          "type": "uint64"
+        },
+        {
+          "name": "amount",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "createScoreBox",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "updateScoreBox",
+      "args": [
+        {
+          "name": "address",
+          "type": "address"
+        },
+        {
+          "name": "sp",
+          "type": "uint64"
+        },
+        {
+          "name": "cp",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "createApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "optInToApplication",
+      "args": [],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "startChallenge",
+      "args": [
+        {
+          "name": "length",
+          "type": "uint64"
+        },
+        {
+          "name": "given",
+          "type": "uint64"
+        },
+        {
+          "name": "assetId",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "participate",
+      "args": [
+        {
+          "name": "payment",
+          "type": "pay"
+        },
+        {
+          "name": "prediction",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "endChallenge",
+      "args": [],
+      "returns": {
+        "type": "uint64"
+      }
+    }
+  ]
+}
