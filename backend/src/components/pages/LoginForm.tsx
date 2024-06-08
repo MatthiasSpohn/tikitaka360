@@ -85,7 +85,6 @@ export function LoginForm() {
         </CardContent>
         <CardFooter>
           <div className="w-full">
-            <p className={"text-slate-950"}>Doga,Matze;64!<br/></p>
             {response && <p className="w-full text-center">{response}</p>}
           </div>
         </CardFooter>
