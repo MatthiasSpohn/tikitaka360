@@ -3,7 +3,17 @@ import {Avatar, AvatarImage} from "@radix-ui/react-avatar";
 import {Button} from "@/components/ui/button.tsx";
 import {TeamVenue} from 'src/interfaces/tikitaka';
 import {getGameConfigFromViteEnvironment} from "@/config/getGameConfigs.ts";
-import {useQuery} from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
+import {
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"
 
 type Props = {
     updateTeamData: (arg0: TeamData) => void
@@ -16,10 +26,11 @@ type TeamData = {
 }
 
 export default function TeamsCarousel(props: Props) {
+    const [league, setLeague] = useState<number>(140)
     const gameConfig = getGameConfigFromViteEnvironment()
     const baseUrl = gameConfig.gameBaseUrl;
     const season = gameConfig.defaultSeason;
-    const league = gameConfig.defaultLeague;
+    const queryClient = useQueryClient();
 
     let teams: TeamVenue[] = [];
 
@@ -29,7 +40,7 @@ export default function TeamsCarousel(props: Props) {
 
     const fetchTeams = async () => {
         return await axios.get(
-            `${baseUrl}api.php?action=teams&season=${season}&liga=${league}`,
+            `${baseUrl}api/teams?season=${season}&leagueId=${league}`,
             {
                 headers: {
                     'Content-Type': 'application/json'
@@ -37,23 +48,48 @@ export default function TeamsCarousel(props: Props) {
             })
     }
 
-    const {status, data: axiosResponse, error} = useQuery({
-        queryKey: [props],
+    const {status, data, error} = useQuery({
+        queryKey: [league],
         queryFn: fetchTeams,
         staleTime: Infinity,
     });
 
-    if (status === 'error') {
-        console.error(error)
+    const changeLeague = async (val: string) => {
+        setLeague(parseInt(val));
+        await queryClient.fetchQuery({
+            queryKey: [league],
+              queryFn: fetchTeams,
+              staleTime: Infinity,
+        });
     }
 
-    if (status === 'success' && axiosResponse.data) {
-        teams = axiosResponse.data as TeamVenue[];
+    if (error) {
+        return (
+          <section>
+              <div>
+                  <p>An error has occurred: {error.message}</p>
+              </div>
+          </section>
+        )
+    }
 
+    if (status && data) {
+        teams = data.data.data;
         return (
             <section>
+                <DropdownMenu>
+                    <DropdownMenuTrigger>Select League</DropdownMenuTrigger>
+                    <DropdownMenuContent>
+                        <DropdownMenuLabel>League</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuRadioGroup value={`${league}`} onValueChange={changeLeague}>
+                            <DropdownMenuRadioItem value="80">3. Liga (Germany)</DropdownMenuRadioItem>
+                            <DropdownMenuRadioItem value="140">La Liga (Spain)</DropdownMenuRadioItem>
+                        </DropdownMenuRadioGroup>
+                    </DropdownMenuContent>
+                </DropdownMenu>
                 <div className="overflow-x-auto flex snap-mandatory snap-x">
-                    {teams.map((object) =>
+                    {teams.map((object: TeamVenue) =>
                         <div key={object.team_id} className="snap-start">
                             <div className="min-w-96 flex-none p-3 pl-4">
                                 <div
@@ -64,9 +100,9 @@ export default function TeamsCarousel(props: Props) {
                                                 <p className="text-white text-2xl font-bold text-center">{object.code}</p>
                                             </div>
                                             <div className="absolute right-8">
-                                                <img className="w-10 h-10"
-                                                     src={baseUrl + 'assets' + object.logo}
-                                                     alt={object.name}
+                                                <img className="w-auto h-10"
+                                                     src={object.logo}
+                                                     alt={object.team_name}
                                                 />
                                                 {
                                                     object.founded !== 0 &&
@@ -76,14 +112,14 @@ export default function TeamsCarousel(props: Props) {
                                         </div>
                                         <div className="absolute w-full">
                                             <Avatar>
-                                                <AvatarImage src={baseUrl + 'assets' + object.image}
-                                                             alt={object.venue_name}
+                                                <AvatarImage src={object.venue.image}
+                                                             alt={object.venue.venue_name}
                                                              className="w-32 h-32 rounded-full mx-auto border-2 bg-gray-400"/>
                                             </Avatar>
                                             <div className="p-2">
-                                                <h3 className="text-white text-2xl font-bold text-center">{object.name}</h3>
+                                                <h3 className="text-white text-2xl font-bold text-center">{object.team_name}</h3>
                                                 <div className="text-center text-gray-400 text-xs font-semibold">
-                                                    <p>{object.venue_name}</p>
+                                                    <p>{object.venue.venue_name}</p>
                                                 </div>
                                             </div>
                                             <div className="w-full px-12">
@@ -94,23 +130,23 @@ export default function TeamsCarousel(props: Props) {
                                                         <td className="px-1 py-0 text-sm text-gray-400 font-semibold text-center">Surface</td>
                                                     </tr>
                                                     <tr>
-                                                        <td className="px-1 py-0 text-sm text-gray-200 text-center">{object.capacity}</td>
-                                                        <td className="px-1 py-0 text-sm text-gray-200 text-center">{object.surface}</td>
+                                                        <td className="px-1 py-0 text-sm text-gray-200 text-center">{object.venue.capacity}</td>
+                                                        <td className="px-1 py-0 text-sm text-gray-200 text-center">{object.venue.surface}</td>
                                                     </tr>
                                                     </tbody>
                                                 </table>
                                                 <hr className="text-gray-400"/>
-                                                <p className="mt-3 text-xs text-gray-400 text-center">{object.address}<br/>{object.city}
+                                                <p className="mt-3 text-xs text-gray-400 text-center">{object.venue.address}<br/>{object.venue.city}
                                                 </p>
                                             </div>
                                             <div className="text-center mt-3">
                                                 <Button
                                                     onClick={() => handleTeam({
                                                         team_id: object.team_id,
-                                                        team_name: object.name ?? 'No Name',
+                                                        team_name: object.team_name ?? 'No Name',
                                                         team_logo: object.logo ?? 'placeholder.png',
                                                     })}
-                                                >3. Liga Team</Button>
+                                                >Show Team</Button>
                                             </div>
 
                                         </div>

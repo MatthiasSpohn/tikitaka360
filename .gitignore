@@ -1,3 +1,4 @@
 # Project exclude paths
 /backend/src/lib/
 /frontend/src/lib/
+./demo/

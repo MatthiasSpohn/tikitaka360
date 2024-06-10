@@ -13,78 +13,104 @@ export interface GameConfig {
     defaultSeason: number
 }
 
+export interface Statistic {
+    appearances: number | null
+    captain: boolean
+    cardsred: number | null
+    cardsyellow: number | null
+    cardsyellowred: number | null
+    createdAt: string
+    dribblesattempts: number | null
+    dribblespast: number | null
+    dribblessuccess: number | null
+    duelstotal: number | null
+    duelswon: number | null
+    foulscommitted: number | null
+    foulsdrawn: number | null
+    goalsassists: number | null
+    goalsconceded: number | null
+    goalssaves: number | null
+    goalstotal: number | null
+    league_id: number | null
+    lineups: number | null
+    minutes: number | null
+    number: number | null
+    passesaccuracy: number | null
+    passeskey: number | null
+    passestotal: number | null
+    penaltycommited: number | null
+    penaltymissed: number | null
+    penaltysaved: number | null
+    penaltyscored: number | null
+    penaltywon: number | null
+    playerPlayerId: number | null
+    position: string
+    rating: number | null
+    season: number | null
+    shotson: number | null
+    shotstotal: number | null
+    statistic_id: number | null
+    substitutesbench: number | null
+    substitutesin: number | null
+    substitutesout: number | null
+    tacklesblocks: number | null
+    tacklesinterceptions: number | null
+    tacklestotal: number | null
+    team_id: number | null
+    updatedAt: string
+}
+
+export interface TeamPlayer {
+    createdAt: string
+    playerPlayerId: number
+    season: number
+    teamTeamId: number
+    updatedAt: string
+}
+
 export interface PlayerObject {
-    player_id: number
+    age: number
+    birthcountry: string
+    birthdate: string
+    birthplace: string
+    createdAt: string
+    firstname: string
+    height: string
+    injured: boolean
+    lastname: string
     name: string
-    firstname?: string
-    lastname?: string
-    age?: number
-    birthdate?: string
-    birthplace?: string
-    birthcountry?: string
-    nationality?: string
-    height?: string
-    weight?: string
-    injured?: number
-    photo?: string
-    team_id?: number
-    season?: number
-    league_id?: number
-    appearences?: number
-    lineups?: number
-    minutes?: number
-    number?: number
-    position?: string
-    rating?: number
-    captain?: number
-    substitutesin?: number
-    substitutesout?: number
-    substitutesbench?: number
-    shotstotal?: number
-    shotson?: number
-    goalstotal?: number
-    goalsconceded?: number
-    goalsassists?: number
-    goalssaves?: number
-    passestotal?: number
-    passeskey?: number
-    passesaccuracy?: number
-    tacklestotal?: number
-    tacklesblocks?: number
-    tacklesinterceptions?: number
-    duelstotal?: number
-    duelswon?: number
-    dribblesattempts?: number
-    dribblessuccess?: number
-    dribblespast?: number
-    foulsdrawn?: number
-    foulscommitted?: number
-    cardsyellow?: number
-    cardsyellowred?: number
-    cardsred?: number
-    penaltywon?: number
-    penaltycommited?: number
-    penaltyscored?: number
-    penaltymissed?: number
-    penaltysaved?: number
+    nationality: string
+    photo: string
+    player_id: number
+    statistics: Statistic[]
+    team_players: TeamPlayer[]
+    weight: string
+}
+
+export interface Venue {
+    address: string
+    capacity: number
+    city: string
+    createdAt: string
+    image: string
+    surface: string
+    updatedAt: string
+    venue_id: number
+    venue_name: string
 }
 
 export interface TeamVenue {
+    code: string
+    country: string
+    createdAt: string
+    founded: number
+    leagueLeagueId: number
+    logo: string
+    national: boolean
     team_id: number
-    league_id: number
-    name?: string
-    code?: string
-    country?: string
-    founded?: number
-    national?: number
-    logo?: string
-    venue_id?: number
-    venue_name?: string
-    address?: string
-    city?: string
-    capacity?: number
-    surface?: string
-    image?: string
+    team_name: string
+    updatedAt: string
+    venue: Venue
 }
 
 export type PropertiesType = {

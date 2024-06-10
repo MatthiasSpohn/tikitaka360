@@ -26,7 +26,7 @@ export default function Scouting(props: Props) {
     const [acceleration, setAcceleration] = useState(0);
     const [concentration, setConcentration] = useState(0);
 
-    const position = props.playerObject.position;
+    const position = props.playerObject.statistics[0].position;
 
     const ratings: Ratings = {
         dribbling: 0,

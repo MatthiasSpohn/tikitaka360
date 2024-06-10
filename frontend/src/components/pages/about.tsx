@@ -1,5 +1,3 @@
-import dritteLia from '../../assets/images/leagues_id_80.png';
-
 function About() {
     return (
         <>
@@ -42,14 +40,6 @@ function About() {
             </div>
             <div className="card mt-10">
                 <h1 className="text-xl text-center mb-3">First scouting app for<br/>the Algorand blockchain</h1>
-                <div className="flex justify-center items-center">
-                    <img src={dritteLia} className="h-12 mr-1 rounded-full bg-white" alt="3. Liga"/>
-                </div>
-                <div className="flex justify-center items-center mt-3">
-                    <p className="text-sm">
-                        Powered by DFB | 3. Liga
-                    </p>
-                </div>
                 <div>
                     <p className="read-the-docs text-sm text-center">
                         For more info – click on TikiTaka360°<br/>

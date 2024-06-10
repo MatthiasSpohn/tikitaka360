@@ -3,11 +3,12 @@ import algodClient from "@/lib/algodClient.ts";
 import {useQuery} from "@tanstack/react-query";
 import indexerClient from "@/lib/indexerClient.ts";
 import {ApplicationResult} from "@algorandfoundation/algokit-utils/types/indexer";
+import { getGameConfigFromViteEnvironment } from "@/config/getGameConfigs.ts";
 
 export default function PlayerApplications() {
     const [ createdApps, setCreatedApps] = useState<ApplicationResult[] | undefined>(undefined)
-
-    const creatorAddress = 'RP2YXBWYG4U43ZL2OSCZ3D7QQXYTIK7JLKUQVVQ6XMOXCVY74K25R6LMMM';
+    const gameConfig = getGameConfigFromViteEnvironment()
+    const creatorAddress = gameConfig.gameCallerAddress;
 
     const getAccountInfo = async () => {
         return await algodClient.accountInformation(creatorAddress).exclude('none').do();

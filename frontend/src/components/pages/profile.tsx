@@ -47,8 +47,6 @@ function Profile(props: Props) {
 
     const baseUrl = gameConfig.gameBaseUrl;
     const assetId = gameConfig.gameAssetId;
-    const season = gameConfig.defaultSeason;
-    const liga = gameConfig.defaultLeague;
 
     const optinAndReview = async () => {
         if (!playerObject) { return }
@@ -77,36 +75,6 @@ function Profile(props: Props) {
 
     const updateRating = (val: Ratings) => {
         setRatings(val);
-    }
-
-    const saveToOracleServer = async (oraclePayload: OraclePayload)=> {
-        return await axios.put(
-            `${baseUrl}api.php?action=player&season=${season}&liga=${liga}&id=${props.profile}`,
-            oraclePayload,
-            {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-    }
-
-    const fetchPlayerData = async () => {
-        return await axios.get(
-            `${baseUrl}api.php?action=player&season=${season}&liga=${liga}&id=${props.profile}`,
-            {
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            });
-    }
-
-    const { status, data, error } = useQuery({
-        queryKey: [props],
-        queryFn: fetchPlayerData,
-    });
-
-    if (status === 'error') {
-        console.error(error)
     }
 
     const handlePotential = useCallback((value: number[]) => {
@@ -156,11 +124,46 @@ function Profile(props: Props) {
         open = false;
     }
 
-    if (status === 'success' && data) {
-        if (data.data.length > 0) {
-            playerObject = data.data[0];
-            open = true;
-        }
+    const saveToOracleServer = async (oraclePayload: OraclePayload)=> {
+        return await axios.put(
+          `${baseUrl}api/player/${props.profile}`,
+            oraclePayload,
+            {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+    }
+
+    const fetchPlayerData = async () => {
+        return await axios.get(
+          `${baseUrl}api/player/${props.profile}`,
+            {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+    }
+
+    const { status, data, error } = useQuery({
+        queryKey: [props],
+        queryFn: fetchPlayerData,
+    });
+
+    if (error) {
+        return (
+          <section>
+              <div>
+                  <p>An error has occurred: {error.message}</p>
+              </div>
+          </section>
+        )
+    }
+
+    if (status && data) {
+        const playerObject = data.data.data as PlayerObject;
+        open = true;
+
         return (
             <Sheet open={open} onOpenChange={handleOpenClose}>
                 <SheetContent className="bg-gray-950 w-fit">
@@ -174,7 +177,7 @@ function Profile(props: Props) {
                         <SheetTitle
                             className="text-center">{playerObject?.firstname} {playerObject?.lastname}</SheetTitle>
                         <SheetDescription className="text-center">
-                            Position: {playerObject?.position}
+                            Position: {playerObject?.statistics[0].position}
                         </SheetDescription>
                     </SheetHeader>
                     <hr className="my-4"/>
@@ -196,33 +199,33 @@ function Profile(props: Props) {
                                 <><p className="text-right col-span-3">nationality</p><p
                                     className="col-span-3">{playerObject?.nationality}</p></>
                             }
-                            {playerObject?.goalstotal !== 0 &&
+                            {playerObject?.statistics[0].goalstotal !== 0 &&
                                 <><p className="text-right col-span-3">goals</p><p
-                                    className="col-span-3">{playerObject?.goalstotal}</p></>
+                                    className="col-span-3">{playerObject?.statistics[0].goalstotal}</p></>
                             }
-                            {playerObject?.goalssaves !== 0 &&
+                            {playerObject?.statistics[0].goalssaves !== 0 &&
                                 <><p className="text-right col-span-3">goal saves</p><p
-                                    className="col-span-3">{playerObject?.goalssaves}</p></>
+                                    className="col-span-3">{playerObject?.statistics[0].goalssaves}</p></>
                             }
-                            {playerObject?.penaltysaved !== 0 &&
+                            {playerObject?.statistics[0].penaltysaved !== 0 &&
                                 <><p className="text-right col-span-3">penalty saved</p>
-                                    <p className="col-span-3">{playerObject?.penaltysaved}</p></>
+                                    <p className="col-span-3">{playerObject?.statistics[0].penaltysaved}</p></>
                             }
-                            {playerObject?.foulscommitted !== 0 &&
+                            {playerObject?.statistics[0].foulscommitted !== 0 &&
                                 <><p className="text-right col-span-3">fouls committed</p><p
-                                    className="col-span-3">{playerObject?.foulscommitted}</p></>
+                                    className="col-span-3">{playerObject?.statistics[0].foulscommitted}</p></>
                             }
-                            {playerObject?.cardsyellow !== 0 &&
+                            {playerObject?.statistics[0].cardsyellow !== 0 &&
                                 <><p className="text-right col-span-3">yellow</p><p
-                                    className="col-span-3">{playerObject?.cardsyellow}</p></>
+                                    className="col-span-3">{playerObject?.statistics[0].cardsyellow}</p></>
                             }
-                            {playerObject?.cardsyellowred !== 0 &&
+                            {playerObject?.statistics[0].cardsyellowred !== 0 &&
                                 <><p className="text-right col-span-3">yellow/red</p><p
-                                    className="col-span-3">{playerObject?.cardsyellowred}</p></>
+                                    className="col-span-3">{playerObject?.statistics[0].cardsyellowred}</p></>
                             }
-                            {playerObject?.cardsred !== 0 &&
+                            {playerObject?.statistics[0].cardsred !== 0 &&
                                 <><p className="text-right col-span-3">red</p><p
-                                    className="col-span-3">{playerObject?.cardsred}</p></>
+                                    className="col-span-3">{playerObject?.statistics[0].cardsred}</p></>
                             }
                         </div>
                     </div>

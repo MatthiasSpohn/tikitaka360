@@ -1,4 +1,4 @@
-import {Avatar, AvatarFallback, AvatarImage} from "@radix-ui/react-avatar";
+import {Avatar, AvatarImage} from "@radix-ui/react-avatar";
 import {Button} from "@/components/ui/button.tsx";
 import {NftType} from "@/interfaces/tikitaka.ts";
 import {useQuery} from "@tanstack/react-query";
@@ -6,7 +6,6 @@ import AppAssets from "@/components/wallet/app-assets.ts";
 import {TealKeyValue} from "algosdk/dist/types/client/v2/algod/models/types";
 import {microalgosToAlgos} from "algosdk";
 import useTxnHandler from "@/components/wallet/txn-handler.ts";
-import {getGameConfigFromViteEnvironment} from "@/config/getGameConfigs.ts";
 
 type Props = {
     appId: number | bigint,
@@ -15,11 +14,9 @@ type Props = {
 }
 
 export default function PlayerCard(props: Props) {
-    const gameConfig = getGameConfigFromViteEnvironment()
     const {getPlayerCardClient, optInToAsset, purchaseAsset} = useTxnHandler();
 
     const appAssets = AppAssets();
-    const baseUrl = gameConfig.gameBaseUrl;
 
     if (!props.appId || !props.globalStates) throw new Error('Player not found.')
 
@@ -69,15 +66,14 @@ export default function PlayerCard(props: Props) {
                     <div className="relative h-[485px]">
                         <div className="flex justify-between justify-items-center">
                             <div className="absolute left-8 top-1.5 w-16">
-                                <img className="w-10 h-10"
-                                     src={'/assets/lilo/80_3_liga.png'}
-                                     alt="3. Liga (Germany)"
+                                <img className="w-auto h-10"
+                                     src={`https://media.api-sports.io/football/leagues/${data.properties.league_id}.png`}
+                                     alt="League"
                                 />
-                                <p className="text-white text-xs">3. Liga</p>
                             </div>
                             <div className="absolute right-8">
                                 <img className="w-10 h-10"
-                                     src={baseUrl + 'assets/teams/' + data.properties.team_id + '.png'}
+                                     src={`https://media.api-sports.io/football/teams/${data.properties.team_id}.png`}
                                      alt=""
                                 />
                                 {data.properties.number !== 0 && (
@@ -88,13 +84,12 @@ export default function PlayerCard(props: Props) {
 
                         <div className="absolute top-16 w-full">
                             <Avatar>
-                                <AvatarImage src={baseUrl + 'assets/players/' + data.properties.player_id + '.png'}
+                                <AvatarImage src={`https://media.api-sports.io/football/players/${data.properties.player_id}.png`}
                                              alt={data.properties.firstname + ' ' + data.properties.lastname}
                                              className="w-32 h-32 rounded-full mx-auto border-2 bg-gray-400"/>
-                                <AvatarFallback>CN</AvatarFallback>
                             </Avatar>
                             <div className="p-2 mt-5">
-                                <h3 className="text-white text-2xl font-bold text-center">{data.properties.firstname + ' ' + data.properties.lastname}</h3>
+                                <h3 className="text-white text-xl font-bold text-center">{data.properties.firstname + ' ' + data.properties.lastname}</h3>
                                 <div className="text-center text-gray-400 text-xs font-semibold">
                                     <p>{data.properties.position}</p>
                                 </div>
@@ -117,8 +112,7 @@ export default function PlayerCard(props: Props) {
                                     </tbody>
                                 </table>
                                 <p className="mt-3 text-xs text-gray-400 text-center">
-                                    You will receive {challengePoints} challenge points (CP) for your assessment
-                                    of <strong>{data.properties.firstname}&nbsp;{data.properties.lastname}</strong>.
+                                    You will receive {challengePoints} challenge points (CP) for your assessment.
                                 </p>
                             </div>
                             <hr className="text-gray-400 mt-5"/>
