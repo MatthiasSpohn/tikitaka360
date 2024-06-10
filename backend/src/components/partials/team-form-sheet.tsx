@@ -30,7 +30,7 @@ export function TeamFormSheet(props: Props) {
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      league_id: 80,
+      league_id: 140,
       season: 2023
     }
   })

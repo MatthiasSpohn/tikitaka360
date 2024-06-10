@@ -2,6 +2,7 @@ import { Table, TableBody, TableCaption, TableHead, TableHeader, TableRow } from
 import { StatisticsRow } from "@/components/partials/statistics-row.tsx";
 import { useEffect, useState } from "react";
 import { ApplicationResult } from "@algorandfoundation/algokit-utils/types/indexer";
+import { getGameConfigFromViteEnvironment } from "@/config/getGameConfigs.ts";
 import { useQuery } from "@tanstack/react-query";
 import algodClient from "@/lib/algodClient.ts";
 
@@ -10,7 +11,9 @@ type Props = {
 }
 
 export function StatisticsComponent(props: Props) {
-  const creatorAddress = 'NBLA7YYTW7YYJ64A4UUQWM4YV57RXPLMZ53SCODDVZ4EDGZLVYD7AN5KAI';
+  const gameConfig = getGameConfigFromViteEnvironment()
+  const creatorAddress = gameConfig.gameCallerAddress;
+
   const [ createdApps, setCreatedApps] = useState<ApplicationResult[] | undefined>(undefined)
 
   const getAccountInfo = async () => {
@@ -34,7 +37,6 @@ export function StatisticsComponent(props: Props) {
       setCreatedApps(accountInfo['created-apps'])
     })
   }, [props.reload]);
-
 
   return(
     <Table>

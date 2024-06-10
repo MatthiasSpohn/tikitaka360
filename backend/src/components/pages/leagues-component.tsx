@@ -1,13 +1,9 @@
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuLabel, DropdownMenuItem } from "@/components/ui/dropdown-menu.tsx";
-import { Button } from "@/components/ui/button.tsx";
-
 import { LeagueFormSheet } from "@/components/partials/league-form-sheet.tsx";
 import { LeaguePayload } from "@/interfaces/LeaguePayload.ts";
 import axios from "axios";
 import { axiosHeaders, baseURL } from "@/utils/common-axios.ts";
 import { useEffect, useState } from "react";
-import { MoreHorizontal } from "lucide-react";
 
 export function LeaguesComponent() {
   const [leagues, setLeagues] = useState<LeaguePayload[]>([]);
@@ -22,7 +18,6 @@ export function LeaguesComponent() {
           if (!res.data.status) {
             console.log(res.data.error.message);
           } else {
-            console.log(res);
             const response_data: LeaguePayload[] = res.data.data;
             setLeagues(response_data)
           }
@@ -106,26 +101,10 @@ export function LeaguesComponent() {
               />
             </TableCell>
             <TableCell className="font-medium">
-              {lp.season}
+              {lp.season} / {lp.season + 1}
             </TableCell>
-            <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button
-                    aria-haspopup="true"
-                    size="icon"
-                    variant="ghost"
-                  >
-                    <MoreHorizontal className="h-4 w-4" />
-                    <span className="sr-only">Toggle menu</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                  <DropdownMenuItem>Edit</DropdownMenuItem>
-                  <DropdownMenuItem>Delete</DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+            <TableCell className="font-medium">
+              <a href={`/dashboard/teams/${lp.season}/${lp.league_id}`}>Select Teams</a>
             </TableCell>
           </TableRow>
           ))}

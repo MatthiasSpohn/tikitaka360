@@ -1,6 +1,6 @@
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table.tsx";
 import { useEffect, useState } from "react";
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { axiosHeaders, baseURL } from "@/utils/common-axios.ts";
 import { PlayerFormSheet } from "@/components/partials/player-form-sheet.tsx";
 import { PinataResponse, PlayerImportPayload, PlayerPayload } from "@/interfaces/LeaguePayload.ts";
@@ -41,29 +41,48 @@ import { CID } from "multiformats/cid";
 import algosdk from "algosdk";
 import { useWallet } from "@txnlab/use-wallet";
 import { getAlgodConfigFromViteEnvironment } from "@/utils/network/getAlgoClientConfigs.ts";
-import { PlayerCardCallerClient } from "@/components/contracts/PlayerCardCallerClient.ts";
+import { getGameConfigFromViteEnvironment } from "@/config/getGameConfigs.ts";
+import { ChallengeClient } from "@/components/contracts/ChallengeClient.ts";
+import { ChallengeForm } from "@/components/partials/challenge-form.tsx";
+import { microAlgos } from "@algorandfoundation/algokit-utils";
+import { useLoaderData } from "react-router-dom";
+algokit.Config.configure({ populateAppCallResources: true });
 
 type MintResponse = {
   data: never;
   status: boolean;
 };
-
-algokit.Config.configure({ populateAppCallResources: true });
+type ChallengeResponse = {
+  length: number
+  given: number
+  player: number
+};
+type ResData = {
+  data: AxiosResponse,
+  season: number
+  teamId: number
+}
 
 export function PlayerComponent() {
-  const firstIndex = 0;
+  const firstIndex: number = 0;
+  const itemsPerPage: number = 10;
+  const headers = axiosHeaders;
+  const baseUrl = baseURL;
+  const resData: ResData = useLoaderData() as ResData;
+
   const [players, setPlayers] = useState<PlayerPayload[]>([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [lastIndex, setLastIndex] = useState(0);
-
+  const [teamId, setTeamId] = useState(0);
+  const [season, setSeason] = useState(2023);
   const [open, setOpen] = useState(false)
   const [mint, setMint] = useState<number>(0);
-  const itemsPerPage = 10;
+  const [challenge, setChallenge] = useState<number>(0);
 
-  const { activeAddress, signer } = useWallet()
-  const sender = { signer, addr: activeAddress! }
-  const algodConfig = getAlgodConfigFromViteEnvironment()
-  const playerCardCallerAppID: number = 676428457;
+  const { activeAddress, signer } = useWallet();
+  const sender = { signer, addr: activeAddress! };
+  const algodConfig = getAlgodConfigFromViteEnvironment();
+  const gameConfig = getGameConfigFromViteEnvironment();
 
   const algodClient = new algosdk.Algodv2(
     algodConfig.token as string,
@@ -71,23 +90,20 @@ export function PlayerComponent() {
     algodConfig.port
   );
 
-  const playerCardCaller = new PlayerCardCallerClient(
+  const challengeClient = new ChallengeClient(
     {
       resolveBy: 'id',
-      id: playerCardCallerAppID,
+      id: Number(gameConfig.gameAppId),
     },
     algodClient,
   );
-
-  const headers = axiosHeaders;
-  const baseUrl = baseURL;
 
   const submitAndSign = async (reserveAddress: string, pinataResponse: PinataResponse) => {
     if (!signer || !activeAddress) {
       toast.warning('Please connect wallet first')
       return
     }
-    const { appAddress } = await playerCardCaller.appClient.getAppReference();
+    const { appAddress } = await challengeClient.appClient.getAppReference();
 
     const assetArgs = {
       name: pinataResponse.assetName,
@@ -100,7 +116,7 @@ export function PlayerComponent() {
 
     const newCardId = Number(
       (
-        await playerCardCaller.mintAndGetApp(
+        await challengeClient.mintAndGetApp(
           assetArgs,
           {
             sender,
@@ -126,7 +142,7 @@ export function PlayerComponent() {
     const address = algosdk.getApplicationAddress(appid);
     const args = { address: address, appid: appid, amount: amount };
 
-    await playerCardCaller.fundFactoryApp(args, {
+    await challengeClient.fundFactoryApp(args, {
       sender,
       sendParams: {
         fee: algokit.microAlgos(4_000),
@@ -140,12 +156,11 @@ export function PlayerComponent() {
   const fetchData = async () => {
     const offset = currentPage * itemsPerPage;
     try {
-      const response = await axios.get(`${baseUrl}/player?offset=${offset}`, { headers });
+      const response = await axios.get(`${baseUrl}/player?season=${season}&teamId=${teamId}&offset=${offset}`, { headers });
       if (response.status === 200 && response.data) {
         if (!response.data.status) {
           toast.error(response.data.error.message);
         } else {
-          console.log(response.data.data);
           setLastIndex(Math.ceil(response.data.data.count / itemsPerPage));
           const playerPayload: PlayerPayload[] = response.data.data.rows;
           setPlayers(playerPayload);
@@ -156,14 +171,11 @@ export function PlayerComponent() {
     }
   };
 
-  useEffect(() => {
-    fetchData().then(() => null);
-  },[]);
-
   const changePage = (value: number) => {
     setCurrentPage(value);
     fetchData().then(() => null);
   };
+
   const submit = (val: PlayerImportPayload) => {
     axios.post(`${baseUrl}/player`, val, {headers})
       .then((res) => {
@@ -183,6 +195,9 @@ export function PlayerComponent() {
 
   const handleMint = (res: MintResponse) => {
     setOpen(false);
+    setMint(0);
+    setChallenge(0);
+
     if (!res.status) {
       toast.error('Error pinning metadata to IPFS');
     } else {
@@ -198,6 +213,53 @@ export function PlayerComponent() {
       submitAndSign(reserveAddress, pinataResponse).then(() => null)
     }
   }
+
+  const handleChallenge = async (challengeResponse: ChallengeResponse) => {
+    setOpen(false);
+    setMint(0);
+    setChallenge(0);
+
+    if (!challengeResponse.player || !challengeResponse.given) {
+      toast.error('Error wrong challenge settings');
+      return;
+    }
+
+    if (!signer || !activeAddress) {
+      toast.warning('Please connect wallet first')
+      return
+    }
+
+    toast.info('Creating challenge ...')
+
+    const transferResult = await challengeClient.startChallenge(
+      {
+        length: challengeResponse.length,
+        given: challengeResponse.given,
+        assetId: challengeResponse.player,
+      }, {
+        sender,
+        sendParams: {
+          fee: microAlgos(1_000),
+        }
+      });
+    toast.info('Challenge created')
+    console.log(transferResult.confirmation);
+  }
+
+  useEffect(() => {
+    const response = resData.data as AxiosResponse;
+    if (response.status === 200 && response.data) {
+      if (!response.data.status) {
+        toast.error(response.data.error.message);
+      } else {
+        setTeamId(resData.teamId);
+        setSeason(resData.season);
+        setLastIndex(Math.ceil(response.data.data.count / itemsPerPage));
+        const playerPayload: PlayerPayload[] = response.data.data.rows;
+        setPlayers(playerPayload);
+      }
+    }
+  },[resData])
 
   return(
     <div className="h-full py-6">
@@ -245,7 +307,7 @@ export function PlayerComponent() {
                     <PopoverTrigger asChild>
                       <Button variant="outline">{pp.firstname} {pp.lastname}</Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-80">
+                    {pp.statistics && <PopoverContent className="w-80">
                       <div className="grid gap-4">
                         <div className="space-y-2">
                           <h4 className="font-medium leading-none">Statistics</h4>
@@ -306,7 +368,7 @@ export function PlayerComponent() {
                           </div>
                         </div>
                       </div>
-                    </PopoverContent>
+                    </PopoverContent>}
                   </Popover>
                 </TableCell>
                 <TableCell className="hidden sm:table-cell font-medium">
@@ -339,8 +401,18 @@ export function PlayerComponent() {
                     <DropdownMenuContent align="end">
                       <DropdownMenuLabel>Actions</DropdownMenuLabel>
                       <DropdownMenuItem>
-                        <DrawerTrigger onClick={() => setMint(pp.player_id)}>Mint NFT</DrawerTrigger>
+                        <DrawerTrigger onClick={() => {
+                          setChallenge(0);
+                          setMint(pp.player_id)
+                        }}>Mint NFT</DrawerTrigger>
                       </DropdownMenuItem>
+                      <DropdownMenuItem>
+                        <DrawerTrigger onClick={() => {
+                          setMint(0);
+                          setChallenge(pp.player_id)
+                        }}>Create Challenge</DrawerTrigger>
+                      </DropdownMenuItem>
+
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </TableCell>
@@ -388,13 +460,22 @@ export function PlayerComponent() {
           </PaginationContent>
         </Pagination>
 
-        <DrawerContent>
+        {mint > 0 && <DrawerContent>
           <DrawerHeader>
             <DrawerTitle>Mint NFT on Algorand</DrawerTitle>
             <DrawerDescription>This action will mint a NFT (ARC-19) for this player.</DrawerDescription>
           </DrawerHeader>
           <MintForm playerId={mint} onSubmit={handleMint} />
         </DrawerContent>
+        }
+        {challenge > 0 && <DrawerContent>
+          <DrawerHeader>
+            <DrawerTitle>Create a new Challenge</DrawerTitle>
+            <DrawerDescription>This action will create a challenge for this player.</DrawerDescription>
+          </DrawerHeader>
+          <ChallengeForm playerId={challenge} onSubmit={handleChallenge} />
+        </DrawerContent>
+        }
       </Drawer>
     </div>
   )
