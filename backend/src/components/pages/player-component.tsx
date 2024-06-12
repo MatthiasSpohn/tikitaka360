@@ -38,13 +38,13 @@ import { toast } from "sonner";
 import { MoreHorizontal } from "lucide-react";
 import { MintForm } from "@/components/partials/mint-form.tsx";
 import { CID } from "multiformats/cid";
-import algosdk from "algosdk";
 import { useWallet } from "@txnlab/use-wallet";
 import { getAlgodConfigFromViteEnvironment } from "@/utils/network/getAlgoClientConfigs.ts";
 import { getGameConfigFromViteEnvironment } from "@/config/getGameConfigs.ts";
-import { ChallengeClient } from "@/components/contracts/ChallengeClient.ts";
+import { TikiTaka360Client } from "@/components/contracts/TikiTaka360Client.ts";
 import { ChallengeForm } from "@/components/partials/challenge-form.tsx";
 import { microAlgos } from "@algorandfoundation/algokit-utils";
+import algosdk, { SuggestedParams } from 'algosdk';
 import { useLoaderData } from "react-router-dom";
 algokit.Config.configure({ populateAppCallResources: true });
 
@@ -90,7 +90,7 @@ export function PlayerComponent() {
     algodConfig.port
   );
 
-  const challengeClient = new ChallengeClient(
+  const tikiTaka360Client = new TikiTaka360Client(
     {
       resolveBy: 'id',
       id: Number(gameConfig.gameAppId),
@@ -103,7 +103,7 @@ export function PlayerComponent() {
       toast.warning('Please connect wallet first')
       return
     }
-    const { appAddress } = await challengeClient.appClient.getAppReference();
+    const { appAddress } = await tikiTaka360Client.appClient.getAppReference();
 
     const assetArgs = {
       name: pinataResponse.assetName,
@@ -116,7 +116,7 @@ export function PlayerComponent() {
 
     const newCardId = Number(
       (
-        await challengeClient.mintAndGetApp(
+        await tikiTaka360Client.mintAndGetApp(
           assetArgs,
           {
             sender,
@@ -142,7 +142,7 @@ export function PlayerComponent() {
     const address = algosdk.getApplicationAddress(appid);
     const args = { address: address, appid: appid, amount: amount };
 
-    await challengeClient.fundFactoryApp(args, {
+    await tikiTaka360Client.fundFactoryApp(args, {
       sender,
       sendParams: {
         fee: algokit.microAlgos(4_000),
@@ -156,7 +156,7 @@ export function PlayerComponent() {
   const fetchData = async () => {
     const offset = currentPage * itemsPerPage;
     try {
-      const response = await axios.get(`${baseUrl}/player?season=${season}&teamId=${teamId}&offset=${offset}`, { headers });
+      const response = await axios.get(`${baseUrl}/player?season=${season}&teamId=${teamId}&offset=${offset}&limit=10`, { headers });
       if (response.status === 200 && response.data) {
         if (!response.data.status) {
           toast.error(response.data.error.message);
@@ -231,11 +231,21 @@ export function PlayerComponent() {
 
     toast.info('Creating challenge ...')
 
-    const transferResult = await challengeClient.startChallenge(
+    const { appAddress } = await tikiTaka360Client.appClient.getAppReference();
+    const suggestedParams: SuggestedParams = await algodClient.getTransactionParams().do();
+    const paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+      from: activeAddress,
+      to: appAddress,
+      amount: 100_000,
+      suggestedParams,
+    });
+
+    const transferResult = await tikiTaka360Client.createChallenge(
       {
+        payment: paymentTxn,
         length: challengeResponse.length,
         given: challengeResponse.given,
-        assetId: challengeResponse.player,
+        playerId: challengeResponse.player,
       }, {
         sender,
         sendParams: {

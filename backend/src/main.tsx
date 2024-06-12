@@ -55,7 +55,7 @@ const router = createBrowserRouter([
                 path: "/dashboard/players/:season/:team",
                 loader: async ({ params }) => {
                   return {
-                    data: await axios.get(`${baseUrl}/player?season=${params.season}&teamId=${params.team}&offset=0`, { headers }),
+                    data: await axios.get(`${baseUrl}/player?season=${params.season}&teamId=${params.team}&offset=0&limit=10`, { headers }),
                     season: params.season,
                     teamId: params.team,
                   };
