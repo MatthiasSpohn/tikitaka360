@@ -12,5 +12,6 @@ export function getGameConfigFromViteEnvironment(): GameConfig {
         gameCallerAddress: import.meta.env.VITE_CALLER_ADDRESS,
         defaultLeague: import.meta.env.VITE_DEFAULT_LEAGUE,
         defaultSeason: import.meta.env.VITE_DEFAULT_SEASON,
+        defaultGateway: import.meta.env.VITE_PINATA_GATEWAY,
     }
 }

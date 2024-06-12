@@ -11,6 +11,8 @@ export interface GameConfig {
     defaultLeague: number
     /** First Year of a season exp. 2023 */
     defaultSeason: number
+    /** Name of the pinata gateway */
+    defaultGateway: string
 }
 
 export interface Statistic {

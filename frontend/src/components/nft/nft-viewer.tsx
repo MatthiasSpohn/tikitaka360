@@ -1,7 +1,7 @@
 import {useQuery} from "@tanstack/react-query";
 import {NftType} from "@/interfaces/tikitaka.ts";
 import AppAssets from "@/components/wallet/app-assets.ts";
-import {Avatar, AvatarFallback, AvatarImage} from "@radix-ui/react-avatar";
+import {Avatar, AvatarImage} from "@radix-ui/react-avatar";
 import {useState} from "react";
 import {getGameConfigFromViteEnvironment} from "@/config/getGameConfigs.ts";
 
@@ -19,11 +19,14 @@ type Props = {
 
 function NftViewer(props: Props) {
     const gameConfig = getGameConfigFromViteEnvironment()
+    const pinataGateway: string = `https://${gameConfig.defaultGateway}.mypinata.cloud/ipfs`;
     const [flip, setFlip] = useState<boolean>(false);
     const baseUrl = gameConfig.gameBaseUrl;
     const appAssets = AppAssets();
 
+
     const fetchNftFromIpfs = async () => {
+        console.log(props.appData);
         if ( !props.appData ) {
             throw new Error('Error in ApplicationData.');
         }
@@ -39,6 +42,7 @@ function NftViewer(props: Props) {
     if (error) return <div>Request Failed</div>;
     if (isLoading) return <div>Loading...</div>;
     if (data) {
+        const image = data.image.substring(7)
         return (
             <div className="flex-none w-[390px] h-[490px] px-1 lg:px-8 relative" onClick={() => setFlip(!flip)}>
                 <div className={`bg-gradient-to-r from-[rgb(6,6,75)] via-[rgb(16,37,161)] to-[rgb(6,6,75)] transform-style-3d transition-transform w-[355px] absolute top-0 backface-hidden ${flip ? 'rotate-y-180' : 'rotate-y-0'}`}>
@@ -47,10 +51,9 @@ function NftViewer(props: Props) {
                         <div className="w-full">
                             <Avatar>
                                 <AvatarImage
-                                    src={baseUrl + 'assets/players/' + data.properties.player_id + '.png'}
+                                    src={`${pinataGateway}/${image}`}
                                     alt={data.properties.firstname + ' ' + data.properties.lastname}
                                     className="w-32 h-32 rounded-full mx-auto border-2 bg-gray-400"/>
-                                <AvatarFallback>CN</AvatarFallback>
                             </Avatar>
                             <div className="p-2 mt-5">
                                 <h3 className="text-white text-2xl font-bold text-center">{data.properties.firstname + ' ' + data.properties.lastname}</h3>
@@ -61,24 +64,18 @@ function NftViewer(props: Props) {
                             <div className="w-full px-12">
                                 <table className="my-3 w-full">
                                     <tbody>
-                                    <tr>
-                                        <td className="px-1 py-0 text-sm text-gray-400 font-semibold">Your
-                                            Assessment
-                                        </td>
-                                        <td className="px-1 py-0 text-sm text-gray-200 ">{props.appData.reviewValue}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="px-1 py-0 text-sm text-gray-400 font-semibold ">Global
-                                            Assessment
-                                        </td>
-                                        <td className="px-1 py-0 text-sm text-gray-200 ">{props.appData.reviewValue}</td>
-                                    </tr>
-                                    <tr>
-                                        <td className="px-1 py-0 text-sm text-gray-400 font-semibold">NFT
-                                            Price
-                                        </td>
-                                        <td className="px-1 py-0 text-sm text-gray-200">{props.appData.assetPrice / 1_000_000} ALGO</td>
-                                    </tr>
+                                        <tr>
+                                            <td className="px-1 py-0 text-sm text-gray-400 font-semibold">Your Assessment</td>
+                                            <td className="px-1 py-0 text-sm text-gray-200 ">{props.appData.reviewValue}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="px-1 py-0 text-sm text-gray-400 font-semibold ">Global Assessment</td>
+                                            <td className="px-1 py-0 text-sm text-gray-200 ">{props.appData.reviewValue}</td>
+                                        </tr>
+                                        <tr>
+                                            <td className="px-1 py-0 text-sm text-gray-400 font-semibold">NFT Price</td>
+                                            <td className="px-1 py-0 text-sm text-gray-200">{props.appData.assetPrice / 1_000_000} ALGO</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>

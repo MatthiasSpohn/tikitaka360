@@ -5,6 +5,7 @@ import algodClient from "@/lib/algodClient.ts";
 import {useQuery} from "@tanstack/react-query";
 import {TealKeyValue} from "algosdk/dist/types/client/v2/algod/models/types";
 import {getGameConfigFromViteEnvironment} from "@/config/getGameConfigs.ts";
+import { TikiTaka360Client } from '@/components/contracts/TikiTaka360Client.ts';
 import {
     Sheet,
     SheetTrigger,
@@ -42,9 +43,10 @@ const formSchema = z.object({
 
 function Account() {
     const gameConfig = getGameConfigFromViteEnvironment()
-    const { activeAccount, providers } = useWallet()
+    const { activeAddress, activeAccount, providers } = useWallet()
     const { walletBalance, walletAvailableBalance, optedAssets } = useWalletBalance()
     const [gameAccount, setGameAccount] = useLocalStorage("tikitaka", null);
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -53,6 +55,18 @@ function Account() {
             age: 16
         }
     })
+    const tikiTaka360Client = new TikiTaka360Client(
+      {
+          resolveBy: 'id',
+          id: Number(gameConfig.gameAppId),
+      },
+      algodClient,
+    );
+
+    const fetchAppAccountInfo = async () => {
+        const result =  await tikiTaka360Client.readScoreBox({ address: activeAddress! }, {});
+        console.log(result.return);
+    }
 
     const fetchAppInfo = async () => {
         const callerAppAddress = gameConfig.gameCallerAddress;
@@ -68,6 +82,7 @@ function Account() {
     const appData: AppData[] = [];
     const assetIds: number[] = [];
     if (status === 'success') {
+        fetchAppAccountInfo().then(() => null);
         data['created-apps'].forEach((app: { id: number; params: { [x: string]: TealKeyValue[]; }}) => {
             const globalStates = app.params['global-state'];
             const assetID = globalStates.find((tealKeyValue: TealKeyValue) => Buffer.from(tealKeyValue.key, 'base64').toString() === "n")?.value.uint;
@@ -79,6 +94,7 @@ function Account() {
             assetIds.push(asset['asset-id']);
         })
     }
+
 
     if (status === 'error') {
         return <div>An error occurred: {error.message}</div>;  // Error state
@@ -322,6 +338,7 @@ function Account() {
     }
 
     const cp = optedAssets?.find((asset) => (asset["asset-id"] === Number(gameConfig.gameAssetId)));
+
     if (cp) {
         challengePoints = cp.amount / 10;
     }
@@ -400,7 +417,7 @@ function Account() {
                             </svg>
                         </div>
                         <div className="p-6 pt-0">
-                            <div className="text-2xl font-bold">{challengePoints}</div>
+                            <div className="text-2xl font-bold">{challengePoints / 10}</div>
                             <p className="text-xs text-muted-foreground">Howto get Challenge Points</p></div>
                     </div>
 

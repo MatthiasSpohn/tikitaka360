@@ -24,6 +24,7 @@ interface ImportMetaEnv {
     readonly VITE_CALLER_ADDRESS: string
     readonly VITE_DEFAULT_LEAGUE: number
     readonly VITE_DEFAULT_SEASON: number
+    readonly VITE_PINATA_GATEWAY: string
 }
 
 interface ImportMeta {

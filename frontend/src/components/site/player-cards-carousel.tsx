@@ -11,8 +11,7 @@ type Props = {
 }
 
 export default function PlayerCardsCarousel(props: Props) {
-    const gameConfig = getGameConfigFromViteEnvironment()
-    const creatorAddress = gameConfig.gameCallerAddress;
+    const creatorAddress = getGameConfigFromViteEnvironment().gameCallerAddress;
     const [ createdApps, setCreatedApps] = useState<ApplicationResult[] | undefined>(undefined)
 
     const getAccountInfo = async () => {

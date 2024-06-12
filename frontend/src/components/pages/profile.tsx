@@ -19,6 +19,12 @@ import {useQuery} from "@tanstack/react-query";
 import {useCallback, useState} from "react";
 import {getGameConfigFromViteEnvironment} from "@/config/getGameConfigs.ts";
 import Scouting from "@/components/pages/partials/scouting.tsx";
+import { TikiTaka360Client } from "@/components/contracts/TikiTaka360Client.ts";
+import algosdk, { SuggestedParams } from "algosdk";
+import * as algokit from '@algorandfoundation/algokit-utils';
+import { getAlgodConfigFromViteEnvironment } from "@/utils/network/getAlgoClientConfigs.ts";
+import { microAlgos } from "@algorandfoundation/algokit-utils";
+algokit.Config.configure({ populateAppCallResources: true });
 
 type Props = {
     profile: number
@@ -36,7 +42,8 @@ type Props = {
 
 function Profile(props: Props) {
     const gameConfig = getGameConfigFromViteEnvironment()
-    const {activeAddress} = useWallet()
+    const { activeAddress, signer } = useWallet();
+    const sender = { signer, addr: activeAddress! };
     const {getPlayerCardClient, optIn, optInToAsset, setNewReview} = useTxnHandler();
     const [potential, setPotential] = useState(0);
     const [forecast, setForecast] = useState('Move the slider for your assessment')
@@ -47,6 +54,21 @@ function Profile(props: Props) {
 
     const baseUrl = gameConfig.gameBaseUrl;
     const assetId = gameConfig.gameAssetId;
+
+    const algodConfig = getAlgodConfigFromViteEnvironment();
+    const algodClient = new algosdk.Algodv2(
+      algodConfig.token as string,
+      algodConfig.server,
+      algodConfig.port
+    );
+
+    const tikiTaka360Client = new TikiTaka360Client(
+      {
+          resolveBy: 'id',
+          id: Number(gameConfig.gameAppId),
+      },
+      algodClient,
+    );
 
     const optinAndReview = async () => {
         if (!playerObject) { return }
@@ -60,12 +82,35 @@ function Profile(props: Props) {
         }
         await saveToOracleServer(oraclePayload);
 
-        if (!activeAddress || !props.app) {
+        if (!activeAddress) {
+            return;
+        }
+        console.log(playerObject);
+        const { appAddress } = await tikiTaka360Client.appClient.getAppReference();
+        const suggestedParams: SuggestedParams = await algodClient.getTransactionParams().do();
+        const paymentTxn = algosdk.makePaymentTxnWithSuggestedParamsFromObject({
+            from: activeAddress,
+            to: appAddress,
+            amount: 43_400,
+            suggestedParams,
+        });
+        await tikiTaka360Client.collectScorePoints(
+          {
+              payment: paymentTxn,
+          },
+          {
+              sender,
+              sendParams: {
+                  fee: microAlgos(1_000),
+              },
+          }
+        );
+
+        if (!props.app) {
             return;
         }
 
         const playerCardClient = getPlayerCardClient(props.app);
-
         await optIn(playerCardClient);
         await optInToAsset(assetId, playerCardClient)
         const resp = await setNewReview(potential, playerCardClient);
@@ -161,7 +206,7 @@ function Profile(props: Props) {
     }
 
     if (status && data) {
-        const playerObject = data.data.data as PlayerObject;
+        playerObject = data.data.data as PlayerObject;
         open = true;
 
         return (

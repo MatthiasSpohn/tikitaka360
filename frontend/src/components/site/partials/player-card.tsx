@@ -120,7 +120,7 @@ export default function PlayerCard(props: Props) {
                                 <Button
                                     className="text-xs py-0 px-4 rounded-full"
                                     onClick={() => handlePlayer(data.properties.player_id)}
-                                >Make Assessment</Button>
+                                >Earn Challenge Points</Button>
                                 <Button
                                     className="text-xs py-0 px-4 rounded-full"
                                     onClick={purchaseNft}
