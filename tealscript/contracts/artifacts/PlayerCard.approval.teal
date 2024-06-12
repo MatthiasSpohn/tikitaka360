@@ -25,7 +25,7 @@ switch *call_NoOp *call_OptIn *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED
 doAxfer:
 	proto 3 0
 
-	// contracts/PlayerCard.algo.ts:17
+	// contracts/PlayerCard.algo.ts:18
 	// sendAssetTransfer({
 	//       assetReceiver: receiver,
 	//       xferAsset: asset,
@@ -35,17 +35,17 @@ doAxfer:
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts/PlayerCard.algo.ts:18
+	// contracts/PlayerCard.algo.ts:19
 	// assetReceiver: receiver
 	frame_dig -1 // receiver: Address
 	itxn_field AssetReceiver
 
-	// contracts/PlayerCard.algo.ts:19
+	// contracts/PlayerCard.algo.ts:20
 	// xferAsset: asset
 	frame_dig -2 // asset: AssetID
 	itxn_field XferAsset
 
-	// contracts/PlayerCard.algo.ts:20
+	// contracts/PlayerCard.algo.ts:21
 	// assetAmount: amount
 	frame_dig -3 // amount: uint64
 	itxn_field AssetAmount
@@ -62,7 +62,7 @@ doAxfer:
 doOptIn:
 	proto 1 0
 
-	// contracts/PlayerCard.algo.ts:25
+	// contracts/PlayerCard.algo.ts:26
 	// this.doAxfer(this.app.address, asset, 0)
 	int 0
 	frame_dig -1 // asset: AssetID
@@ -81,31 +81,31 @@ doOptIn:
 createApplication:
 	proto 0 0
 
-	// contracts/PlayerCard.algo.ts:30
+	// contracts/PlayerCard.algo.ts:31
 	// this.globalReview.value = 0
 	byte 0x72 // "r"
 	int 0
 	app_global_put
 
-	// contracts/PlayerCard.algo.ts:31
+	// contracts/PlayerCard.algo.ts:32
 	// this.reviewCount.value = 0
 	byte 0x63 // "c"
 	int 0
 	app_global_put
 
-	// contracts/PlayerCard.algo.ts:32
+	// contracts/PlayerCard.algo.ts:33
 	// this.assetPrice.value = 0
 	byte 0x70 // "p"
 	int 0
 	app_global_put
 
-	// contracts/PlayerCard.algo.ts:33
+	// contracts/PlayerCard.algo.ts:34
 	// this.assetId.value = AssetID.zeroIndex
 	byte 0x6e // "n"
 	int 0
 	app_global_put
 
-	// contracts/PlayerCard.algo.ts:34
+	// contracts/PlayerCard.algo.ts:35
 	// this.tokenId.value = AssetID.zeroIndex
 	byte 0x74 // "t"
 	int 0
@@ -127,13 +127,13 @@ createApplication:
 optInToToken:
 	proto 1 0
 
-	// contracts/PlayerCard.algo.ts:39
+	// contracts/PlayerCard.algo.ts:40
 	// this.tokenId.value = asset
 	byte 0x74 // "t"
 	frame_dig -1 // asset: AssetID
 	app_global_put
 
-	// contracts/PlayerCard.algo.ts:40
+	// contracts/PlayerCard.algo.ts:41
 	// this.doOptIn(asset)
 	frame_dig -1 // asset: AssetID
 	callsub doOptIn
@@ -150,7 +150,7 @@ optInToToken:
 optInToApplication:
 	proto 0 0
 
-	// contracts/PlayerCard.algo.ts:46
+	// contracts/PlayerCard.algo.ts:47
 	// this.localReview(this.txn.sender).value = 0
 	txn Sender
 	byte 0x6c // "l"
@@ -210,7 +210,7 @@ createNFT:
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	byte 0x
 
-	// contracts/PlayerCard.algo.ts:51
+	// contracts/PlayerCard.algo.ts:52
 	// createdAsset = sendAssetCreation({
 	//       configAssetName: name,
 	//       configAssetUnitName: unitName,
@@ -225,42 +225,42 @@ createNFT:
 	int acfg
 	itxn_field TypeEnum
 
-	// contracts/PlayerCard.algo.ts:52
+	// contracts/PlayerCard.algo.ts:53
 	// configAssetName: name
 	frame_dig -1 // name: string
 	itxn_field ConfigAssetName
 
-	// contracts/PlayerCard.algo.ts:53
+	// contracts/PlayerCard.algo.ts:54
 	// configAssetUnitName: unitName
 	frame_dig -2 // unitName: string
 	itxn_field ConfigAssetUnitName
 
-	// contracts/PlayerCard.algo.ts:54
+	// contracts/PlayerCard.algo.ts:55
 	// configAssetURL: url
 	frame_dig -3 // url: string
 	itxn_field ConfigAssetURL
 
-	// contracts/PlayerCard.algo.ts:55
+	// contracts/PlayerCard.algo.ts:56
 	// configAssetManager: manager
 	frame_dig -4 // manager: Address
 	itxn_field ConfigAssetManager
 
-	// contracts/PlayerCard.algo.ts:56
+	// contracts/PlayerCard.algo.ts:57
 	// configAssetReserve: reserve
 	frame_dig -5 // reserve: Address
 	itxn_field ConfigAssetReserve
 
-	// contracts/PlayerCard.algo.ts:57
+	// contracts/PlayerCard.algo.ts:58
 	// configAssetDecimals: 0
 	int 0
 	itxn_field ConfigAssetDecimals
 
-	// contracts/PlayerCard.algo.ts:58
+	// contracts/PlayerCard.algo.ts:59
 	// configAssetTotal: total
 	frame_dig -6 // total: uint64
 	itxn_field ConfigAssetTotal
 
-	// contracts/PlayerCard.algo.ts:59
+	// contracts/PlayerCard.algo.ts:60
 	// configAssetDefaultFrozen: 0
 	int 0
 	itxn_field ConfigAssetDefaultFrozen
@@ -274,13 +274,13 @@ createNFT:
 	itxn CreatedAssetID
 	frame_bury 0 // createdAsset: uint64
 
-	// contracts/PlayerCard.algo.ts:61
+	// contracts/PlayerCard.algo.ts:62
 	// this.assetId.value = createdAsset
 	byte 0x6e // "n"
 	frame_dig 0 // createdAsset: uint64
 	app_global_put
 
-	// contracts/PlayerCard.algo.ts:62
+	// contracts/PlayerCard.algo.ts:63
 	// return createdAsset;
 	frame_dig 0 // createdAsset: uint64
 
@@ -313,14 +313,14 @@ setNewReview:
 	byte 0x
 	dupn 2
 
-	// contracts/PlayerCard.algo.ts:67
+	// contracts/PlayerCard.algo.ts:68
 	// assert(this.txn.sender.isOptedInToApp(this.app.id))
 	txn Sender
 	txna Applications 0
 	app_opted_in
 	assert
 
-	// contracts/PlayerCard.algo.ts:68
+	// contracts/PlayerCard.algo.ts:69
 	// assert(this.txn.sender.isOptedInToAsset(this.tokenId.value))
 	txn Sender
 	byte 0x74 // "t"
@@ -330,19 +330,19 @@ setNewReview:
 	pop
 	assert
 
-	// contracts/PlayerCard.algo.ts:70
+	// contracts/PlayerCard.algo.ts:71
 	// globalReview = this.globalReview.value
 	byte 0x72 // "r"
 	app_global_get
 	frame_bury 0 // globalReview: uint64
 
-	// contracts/PlayerCard.algo.ts:71
+	// contracts/PlayerCard.algo.ts:72
 	// reviewCount = this.reviewCount.value
 	byte 0x63 // "c"
 	app_global_get
 	frame_bury 1 // reviewCount: uint64
 
-	// contracts/PlayerCard.algo.ts:72
+	// contracts/PlayerCard.algo.ts:73
 	// localReview = this.localReview(this.txn.sender).value
 	txn Sender
 	byte 0x6c // "l"
@@ -350,7 +350,7 @@ setNewReview:
 	frame_bury 2 // localReview: uint64
 
 	// *if0_condition
-	// contracts/PlayerCard.algo.ts:74
+	// contracts/PlayerCard.algo.ts:75
 	// localReview === 0
 	frame_dig 2 // localReview: uint64
 	int 0
@@ -358,7 +358,7 @@ setNewReview:
 	bz *if0_end
 
 	// *if0_consequent
-	// contracts/PlayerCard.algo.ts:75
+	// contracts/PlayerCard.algo.ts:76
 	// this.doAxfer(this.txn.sender, this.tokenId.value, 10 * (1_000 - this.reviewCount.value))
 	int 10
 	int 1_000
@@ -373,7 +373,7 @@ setNewReview:
 
 *if0_end:
 	// *if1_condition
-	// contracts/PlayerCard.algo.ts:78
+	// contracts/PlayerCard.algo.ts:79
 	// localReview > 0
 	frame_dig 2 // localReview: uint64
 	int 0
@@ -381,7 +381,7 @@ setNewReview:
 	bz *if1_end
 
 	// *if1_consequent
-	// contracts/PlayerCard.algo.ts:81
+	// contracts/PlayerCard.algo.ts:82
 	// reviewCount = reviewCount - 1
 	frame_dig 1 // reviewCount: uint64
 	int 1
@@ -389,7 +389,7 @@ setNewReview:
 	frame_bury 1 // reviewCount: uint64
 
 	// *if2_condition
-	// contracts/PlayerCard.algo.ts:82
+	// contracts/PlayerCard.algo.ts:83
 	// reviewCount === 0
 	frame_dig 1 // reviewCount: uint64
 	int 0
@@ -397,7 +397,7 @@ setNewReview:
 	bz *if2_else
 
 	// *if2_consequent
-	// contracts/PlayerCard.algo.ts:83
+	// contracts/PlayerCard.algo.ts:84
 	// this.globalReview.value = 0
 	byte 0x72 // "r"
 	int 0
@@ -405,7 +405,7 @@ setNewReview:
 	b *if2_end
 
 *if2_else:
-	// contracts/PlayerCard.algo.ts:85
+	// contracts/PlayerCard.algo.ts:86
 	// this.globalReview.value = (globalReview * reviewCount - localReview) / reviewCount
 	byte 0x72 // "r"
 	frame_dig 0 // globalReview: uint64
@@ -420,7 +420,7 @@ setNewReview:
 *if2_end:
 
 *if1_end:
-	// contracts/PlayerCard.algo.ts:90
+	// contracts/PlayerCard.algo.ts:91
 	// this.reviewCount.value = reviewCount + 1
 	byte 0x63 // "c"
 	frame_dig 1 // reviewCount: uint64
@@ -428,14 +428,14 @@ setNewReview:
 	+
 	app_global_put
 
-	// contracts/PlayerCard.algo.ts:92
+	// contracts/PlayerCard.algo.ts:93
 	// this.localReview(this.txn.sender).value = newUserReview
 	txn Sender
 	byte 0x6c // "l"
 	frame_dig -1 // newUserReview: uint64
 	app_local_put
 
-	// contracts/PlayerCard.algo.ts:94
+	// contracts/PlayerCard.algo.ts:95
 	// this.globalReview.value = (globalReview * reviewCount + newUserReview) / this.reviewCount.value
 	byte 0x72 // "r"
 	frame_dig 0 // globalReview: uint64
@@ -448,7 +448,7 @@ setNewReview:
 	/
 	app_global_put
 
-	// contracts/PlayerCard.algo.ts:97
+	// contracts/PlayerCard.algo.ts:98
 	// this.assetPrice.value = 250_000 * this.reviewCount.value
 	byte 0x70 // "p"
 	int 250_000
@@ -457,7 +457,7 @@ setNewReview:
 	*
 	app_global_put
 
-	// contracts/PlayerCard.algo.ts:99
+	// contracts/PlayerCard.algo.ts:100
 	// return this.globalReview.value;
 	byte 0x72 // "r"
 	app_global_get
@@ -490,7 +490,7 @@ setNewReview:
 assetOptIn:
 	proto 1 0
 
-	// contracts/PlayerCard.algo.ts:104
+	// contracts/PlayerCard.algo.ts:105
 	// verifyAssetTransferTxn(txn, {
 	//       assetReceiver: this.txn.sender,
 	//       assetAmount: { lessThanEqualTo: 0 },
@@ -531,7 +531,7 @@ assetOptIn:
 tokenOptIn:
 	proto 1 0
 
-	// contracts/PlayerCard.algo.ts:112
+	// contracts/PlayerCard.algo.ts:113
 	// verifyAssetTransferTxn(txn, {
 	//       assetReceiver: this.txn.sender,
 	//       assetAmount: { lessThanEqualTo: 0 },
@@ -572,7 +572,7 @@ tokenOptIn:
 purchaseNft:
 	proto 1 0
 
-	// contracts/PlayerCard.algo.ts:120
+	// contracts/PlayerCard.algo.ts:121
 	// verifyTxn(payment, {
 	//       receiver: this.app.creator,
 	//       amount: { greaterThanEqualTo: this.assetPrice.value },
@@ -594,7 +594,7 @@ purchaseNft:
 	>=
 	assert
 
-	// contracts/PlayerCard.algo.ts:125
+	// contracts/PlayerCard.algo.ts:126
 	// sendAssetTransfer({
 	//       xferAsset: this.assetId.value,
 	//       assetAmount: 1,
@@ -604,18 +604,18 @@ purchaseNft:
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts/PlayerCard.algo.ts:126
+	// contracts/PlayerCard.algo.ts:127
 	// xferAsset: this.assetId.value
 	byte 0x6e // "n"
 	app_global_get
 	itxn_field XferAsset
 
-	// contracts/PlayerCard.algo.ts:127
+	// contracts/PlayerCard.algo.ts:128
 	// assetAmount: 1
 	int 1
 	itxn_field AssetAmount
 
-	// contracts/PlayerCard.algo.ts:128
+	// contracts/PlayerCard.algo.ts:129
 	// assetReceiver: this.txn.sender
 	txn Sender
 	itxn_field AssetReceiver

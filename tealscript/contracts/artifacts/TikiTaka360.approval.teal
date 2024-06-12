@@ -16,10 +16,26 @@ int 6
 *
 txn OnCompletion
 +
-switch *call_NoOp *call_OptIn *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *create_NoOp *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED
+switch *call_NoOp *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *create_NoOp *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED *NOT_IMPLEMENTED
 
 *NOT_IMPLEMENTED:
 	err
+
+// createScoreBox(sender: Address): void
+createScoreBox:
+	proto 1 0
+
+	// contracts/TikiTaka360.algo.ts:29
+	// this.scoreBox(sender).value = {
+	//       scoutingPoints: 0,
+	//       challengePoints: 0,
+	//     }
+	byte 0x7362 // "sb"
+	frame_dig -1 // sender: Address
+	concat
+	byte 0x00000000000000000000000000000000
+	box_put
+	retsub
 
 // bootstrap()uint64
 *abi_route_bootstrap:
@@ -41,7 +57,7 @@ bootstrap:
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	byte 0x
 
-	// contracts/PlayerCard.algo.ts:145
+	// contracts/TikiTaka360.algo.ts:36
 	// verifyTxn(this.txn, { sender: this.app.creator })
 	// verify sender
 	txn Sender
@@ -51,7 +67,7 @@ bootstrap:
 	==
 	assert
 
-	// contracts/PlayerCard.algo.ts:146
+	// contracts/TikiTaka360.algo.ts:37
 	// assert(!this.tokenID.exists)
 	txna Applications 0
 	byte 0x746f6b656e4944 // "tokenID"
@@ -61,7 +77,7 @@ bootstrap:
 	!
 	assert
 
-	// contracts/PlayerCard.algo.ts:147
+	// contracts/TikiTaka360.algo.ts:38
 	// registeredAsa = sendAssetCreation({
 	//       configAssetName: 'TikiTaka360-Token',
 	//       configAssetUnitName: 'TT360',
@@ -76,42 +92,42 @@ bootstrap:
 	int acfg
 	itxn_field TypeEnum
 
-	// contracts/PlayerCard.algo.ts:148
+	// contracts/TikiTaka360.algo.ts:39
 	// configAssetName: 'TikiTaka360-Token'
 	byte 0x54696b6954616b613336302d546f6b656e // "TikiTaka360-Token"
 	itxn_field ConfigAssetName
 
-	// contracts/PlayerCard.algo.ts:149
+	// contracts/TikiTaka360.algo.ts:40
 	// configAssetUnitName: 'TT360'
 	byte 0x5454333630 // "TT360"
 	itxn_field ConfigAssetUnitName
 
-	// contracts/PlayerCard.algo.ts:150
+	// contracts/TikiTaka360.algo.ts:41
 	// configAssetTotal: 10_000_000_000
 	int 10_000_000_000
 	itxn_field ConfigAssetTotal
 
-	// contracts/PlayerCard.algo.ts:151
+	// contracts/TikiTaka360.algo.ts:42
 	// configAssetDecimals: 2
 	int 2
 	itxn_field ConfigAssetDecimals
 
-	// contracts/PlayerCard.algo.ts:152
+	// contracts/TikiTaka360.algo.ts:43
 	// configAssetManager: this.app.address
 	global CurrentApplicationAddress
 	itxn_field ConfigAssetManager
 
-	// contracts/PlayerCard.algo.ts:153
+	// contracts/TikiTaka360.algo.ts:44
 	// configAssetFreeze: this.app.address
 	global CurrentApplicationAddress
 	itxn_field ConfigAssetFreeze
 
-	// contracts/PlayerCard.algo.ts:154
+	// contracts/TikiTaka360.algo.ts:45
 	// configAssetClawback: this.app.address
 	global CurrentApplicationAddress
 	itxn_field ConfigAssetClawback
 
-	// contracts/PlayerCard.algo.ts:155
+	// contracts/TikiTaka360.algo.ts:46
 	// configAssetReserve: this.app.address
 	global CurrentApplicationAddress
 	itxn_field ConfigAssetReserve
@@ -125,13 +141,13 @@ bootstrap:
 	itxn CreatedAssetID
 	frame_bury 0 // registeredAsa: uint64
 
-	// contracts/PlayerCard.algo.ts:157
+	// contracts/TikiTaka360.algo.ts:48
 	// this.tokenID.value = registeredAsa
 	byte 0x746f6b656e4944 // "tokenID"
 	frame_dig 0 // registeredAsa: uint64
 	app_global_put
 
-	// contracts/PlayerCard.algo.ts:158
+	// contracts/TikiTaka360.algo.ts:49
 	// return registeredAsa;
 	frame_dig 0 // registeredAsa: uint64
 
@@ -191,7 +207,7 @@ mintAndGetApp:
 	// Push empty bytes after the frame pointer to reserve space for local variables
 	byte 0x
 
-	// contracts/PlayerCard.algo.ts:169
+	// contracts/TikiTaka360.algo.ts:60
 	// sendMethodCall<typeof PlayerCard.prototype.createApplication>({
 	//       clearStateProgram: PlayerCard.clearProgram(),
 	//       approvalProgram: PlayerCard.approvalProgram(),
@@ -204,22 +220,22 @@ mintAndGetApp:
 	method "createApplication()void"
 	itxn_field ApplicationArgs
 
-	// contracts/PlayerCard.algo.ts:170
+	// contracts/TikiTaka360.algo.ts:61
 	// clearStateProgram: PlayerCard.clearProgram()
 	byte b64 Cg==
 	itxn_field ClearStateProgram
 
-	// contracts/PlayerCard.algo.ts:171
+	// contracts/TikiTaka360.algo.ts:62
 	// approvalProgram: PlayerCard.approvalProgram()
 	byte b64 CiAEAAEEICYJAXIBYwF0AXABbgFsBBUffHUABAGjo/8xGBSBBgsxGQiNDAH2AjAAAAAAAAAAAAHoAAAAAAAAAAAAAACKAwCxJLIQi/+yFIv+shGL/bISIrIBs4mKAQAii/8yCoj/3YmIAAIjQ4oAACgiZykiZysiZycEImcqImeJNhoBF4gAAiNDigEAKov/Z4v/iP/GiYgAAiNDigAAMQAnBSJmiScGNhoGFzYaBUkVJRJENhoESRUlEkQ2GgNXAgA2GgJXAgA2GgFXAgCIAAUWULAjQ4oGAScHsYEDshCL/7Imi/6yJYv9sieL/LIpi/uyKiKyI4v6siIisiQisgGztDyMACcEiwBniwCMAIknBjYaAReIAAUWULAjQ4oBAScHRwIxADYyAGFEMQAqZHAATEhEKGSMAClkjAExACcFYowCiwIiEkEAEIEKgegHKWQJCypkMQCI/umLAiINQQAgiwEjCYwBiwEiEkEABigiZ0IADSiLAIsBC4sCCYsBCmcpiwEjCGcxACcFi/9mKIsAiwELi/8IKWQKZyuBkKEPKWQLZyhkjABGAokxFiMJSTgQJBJEiAACI0OKAQCL/zgUMQASRIv/OBIiDkSJMRYjCUk4ECQSRIgAAiNDigEAi/84FDEAEkSL/zgSIg5EiTEWIwlJOBAjEkSIAAIjQ4oBAIv/OAc2MgByB0gSRIv/OAgrZA9EsSSyECcEZLIRI7ISMQCyFCKyAbOJgAS4RHs2NhoAjgH+MACABFgdXlcnCIAE+FGOc4AEZskaU4AEAUh1nYAEYAhYk4AE2n/BCjYaAI4H/g/+Jf40/p7/Ov9c/34AJwg2GgCOAf4bAA==
 	itxn_field ApprovalProgram
 
-	// contracts/PlayerCard.algo.ts:172
+	// contracts/TikiTaka360.algo.ts:63
 	// globalNumUint: 5
 	int 5
 	itxn_field GlobalNumUint
 
-	// contracts/PlayerCard.algo.ts:173
+	// contracts/TikiTaka360.algo.ts:64
 	// localNumUint: 1
 	int 1
 	itxn_field LocalNumUint
@@ -231,12 +247,12 @@ mintAndGetApp:
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts/PlayerCard.algo.ts:176
+	// contracts/TikiTaka360.algo.ts:67
 	// factoryApp: AppID = this.itxn.createdApplicationID
 	itxn CreatedApplicationID
 	frame_bury 0 // factoryApp: AppID
 
-	// contracts/PlayerCard.algo.ts:178
+	// contracts/TikiTaka360.algo.ts:69
 	// sendPayment({
 	//       amount: 500_000,
 	//       receiver: factoryApp.address,
@@ -245,12 +261,12 @@ mintAndGetApp:
 	int pay
 	itxn_field TypeEnum
 
-	// contracts/PlayerCard.algo.ts:179
+	// contracts/TikiTaka360.algo.ts:70
 	// amount: 500_000
 	int 500_000
 	itxn_field Amount
 
-	// contracts/PlayerCard.algo.ts:180
+	// contracts/TikiTaka360.algo.ts:71
 	// receiver: factoryApp.address
 	frame_dig 0 // factoryApp: AppID
 	app_params_get AppAddress
@@ -264,7 +280,7 @@ mintAndGetApp:
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts/PlayerCard.algo.ts:183
+	// contracts/TikiTaka360.algo.ts:74
 	// sendMethodCall<typeof PlayerCard.prototype.createNFT>({
 	//       applicationID: factoryApp,
 	//       methodArgs: [name, unitName, url, manager, reserve, total],
@@ -275,12 +291,12 @@ mintAndGetApp:
 	method "createNFT(string,string,string,address,address,uint64)uint64"
 	itxn_field ApplicationArgs
 
-	// contracts/PlayerCard.algo.ts:184
+	// contracts/TikiTaka360.algo.ts:75
 	// applicationID: factoryApp
 	frame_dig 0 // factoryApp: AppID
 	itxn_field ApplicationID
 
-	// contracts/PlayerCard.algo.ts:185
+	// contracts/TikiTaka360.algo.ts:76
 	// methodArgs: [name, unitName, url, manager, reserve, total]
 	frame_dig -1 // name: string
 	dup
@@ -327,7 +343,7 @@ mintAndGetApp:
 	extract 4 0
 	btoi
 
-	// contracts/PlayerCard.algo.ts:188
+	// contracts/TikiTaka360.algo.ts:79
 	// return factoryApp.id;
 	frame_dig 0 // factoryApp: AppID
 
@@ -362,7 +378,7 @@ mintAndGetApp:
 fundFactoryApp:
 	proto 3 0
 
-	// contracts/PlayerCard.algo.ts:192
+	// contracts/TikiTaka360.algo.ts:83
 	// sendMethodCall<typeof PlayerCard.prototype.optInToToken>({
 	//       applicationID: AppID.fromUint64(appid),
 	//       methodArgs: [this.tokenID.value],
@@ -373,12 +389,12 @@ fundFactoryApp:
 	method "optInToToken(uint64)void"
 	itxn_field ApplicationArgs
 
-	// contracts/PlayerCard.algo.ts:193
+	// contracts/TikiTaka360.algo.ts:84
 	// applicationID: AppID.fromUint64(appid)
 	frame_dig -2 // appid: uint64
 	itxn_field ApplicationID
 
-	// contracts/PlayerCard.algo.ts:194
+	// contracts/TikiTaka360.algo.ts:85
 	// methodArgs: [this.tokenID.value]
 	byte 0x746f6b656e4944 // "tokenID"
 	app_global_get
@@ -392,7 +408,7 @@ fundFactoryApp:
 	// Submit inner transaction
 	itxn_submit
 
-	// contracts/PlayerCard.algo.ts:198
+	// contracts/TikiTaka360.algo.ts:89
 	// sendAssetTransfer({
 	//       xferAsset: this.tokenID.value,
 	//       assetAmount: amount,
@@ -402,18 +418,18 @@ fundFactoryApp:
 	int axfer
 	itxn_field TypeEnum
 
-	// contracts/PlayerCard.algo.ts:199
+	// contracts/TikiTaka360.algo.ts:90
 	// xferAsset: this.tokenID.value
 	byte 0x746f6b656e4944 // "tokenID"
 	app_global_get
 	itxn_field XferAsset
 
-	// contracts/PlayerCard.algo.ts:200
+	// contracts/TikiTaka360.algo.ts:91
 	// assetAmount: amount
 	frame_dig -3 // amount: uint64
 	itxn_field AssetAmount
 
-	// contracts/PlayerCard.algo.ts:201
+	// contracts/TikiTaka360.algo.ts:92
 	// assetReceiver: address
 	frame_dig -1 // address: Address
 	itxn_field AssetReceiver
@@ -424,47 +440,6 @@ fundFactoryApp:
 
 	// Submit inner transaction
 	itxn_submit
-	retsub
-
-// createScoreBox()void
-*abi_route_createScoreBox:
-	// execute createScoreBox()void
-	callsub createScoreBox
-	int 1
-	return
-
-// createScoreBox(): void
-createScoreBox:
-	proto 0 0
-
-	// contracts/PlayerCard.algo.ts:207
-	// assert(this.txn.sender === this.app.address)
-	txn Sender
-	global CurrentApplicationAddress
-	==
-	assert
-
-	// contracts/PlayerCard.algo.ts:208
-	// assert(!this.scoreBox(this.txn.sender).exists)
-	byte 0x7362 // "sb"
-	txn Sender
-	concat
-	box_len
-	swap
-	pop
-	!
-	assert
-
-	// contracts/PlayerCard.algo.ts:210
-	// this.scoreBox(this.txn.sender).value = {
-	//       scoutingPoints: 0,
-	//       challengePoints: 0,
-	//     }
-	byte 0x7362 // "sb"
-	txn Sender
-	concat
-	byte 0x00000000000000000000000000000000
-	box_put
 	retsub
 
 // updateScoreBox(address,uint64,uint64)void
@@ -498,14 +473,7 @@ updateScoreBox:
 	byte 0x
 	dup
 
-	// contracts/PlayerCard.algo.ts:217
-	// assert(this.txn.sender === this.app.address)
-	txn Sender
-	global CurrentApplicationAddress
-	==
-	assert
-
-	// contracts/PlayerCard.algo.ts:218
+	// contracts/TikiTaka360.algo.ts:99
 	// assert(this.scoreBox(address).exists)
 	byte 0x7362 // "sb"
 	frame_dig -1 // address: Address
@@ -515,7 +483,7 @@ updateScoreBox:
 	pop
 	assert
 
-	// contracts/PlayerCard.algo.ts:220
+	// contracts/TikiTaka360.algo.ts:101
 	// currentScoutingPoints = this.scoreBox(address).value.scoutingPoints
 	int 0
 	int 8
@@ -527,7 +495,7 @@ updateScoreBox:
 	btoi
 	frame_bury 0 // currentScoutingPoints: uint64
 
-	// contracts/PlayerCard.algo.ts:221
+	// contracts/TikiTaka360.algo.ts:102
 	// currentChallengePoints = this.scoreBox(address).value.challengePoints
 	int 8 // headOffset
 	int 8
@@ -539,7 +507,7 @@ updateScoreBox:
 	btoi
 	frame_bury 1 // currentChallengePoints: uint64
 
-	// contracts/PlayerCard.algo.ts:223
+	// contracts/TikiTaka360.algo.ts:104
 	// this.scoreBox(address).value = {
 	//       scoutingPoints: currentScoutingPoints + sp,
 	//       challengePoints: currentChallengePoints + cp,
@@ -559,84 +527,9 @@ updateScoreBox:
 	box_put
 	retsub
 
-// withdraw(key: uint64, receiver: Address): void
-withdraw:
-	proto 2 0
-
-	// contracts/Challenge.algo.ts:32
-	// this.winnerBoxes(key).delete()
-	byte 0x776e72 // "wnr"
-	frame_dig -1 // key: uint64
-	itob
-	concat
-	box_del
-
-	// contracts/Challenge.algo.ts:34
-	// sendPayment({
-	//       receiver: receiver,
-	//       amount: oppBoxMbr,
-	//     })
-	itxn_begin
-	int pay
-	itxn_field TypeEnum
-
-	// contracts/Challenge.algo.ts:35
-	// receiver: receiver
-	frame_dig -2 // receiver: Address
-	itxn_field Receiver
-
-	// contracts/Challenge.algo.ts:36
-	// amount: oppBoxMbr
-	int 21700
-	itxn_field Amount
-
-	// Fee field not set, defaulting to 0
-	int 0
-	itxn_field Fee
-
-	// Submit inner transaction
-	itxn_submit
-	retsub
-
-// createApplication()void
-*abi_route_createApplication:
-	// execute createApplication()void
-	callsub createApplication
-	int 1
-	return
-
-// createApplication(): void
-createApplication:
-	proto 0 0
-
-	// contracts/Challenge.algo.ts:42
-	// this.winnerIndex.value = 0
-	byte 0x77696e6e6572496e646578 // "winnerIndex"
-	int 0
-	app_global_put
-
-	// contracts/Challenge.algo.ts:43
-	// this.challengeEnd.value = 0
-	byte 0x6368616c6c656e6765456e64 // "challengeEnd"
-	int 0
-	app_global_put
-	retsub
-
-// optInToApplication()void
-*abi_route_optInToApplication:
-	// execute optInToApplication()void
-	callsub optInToApplication
-	int 1
-	return
-
-// optInToApplication(): void
-optInToApplication:
-	proto 0 0
-	retsub
-
-// startChallenge(uint64,uint64,uint64)void
-*abi_route_startChallenge:
-	// assetId: uint64
+// createChallenge(pay,uint64,uint64,uint64)void
+*abi_route_createChallenge:
+	// playerId: uint64
 	txna ApplicationArgs 3
 	btoi
 
@@ -645,60 +538,6 @@ optInToApplication:
 	btoi
 
 	// length: uint64
-	txna ApplicationArgs 1
-	btoi
-
-	// execute startChallenge(uint64,uint64,uint64)void
-	callsub startChallenge
-	int 1
-	return
-
-// startChallenge(length: uint64, given: uint64, assetId: AssetID): void
-startChallenge:
-	proto 3 0
-
-	// contracts/Challenge.algo.ts:51
-	// verifyAppCallTxn(this.txn, { sender: globals.creatorAddress })
-	// verify sender
-	txn Sender
-	global CreatorAddress
-	==
-	assert
-
-	// contracts/Challenge.algo.ts:54
-	// assert(this.challengeEnd.value === 0)
-	byte 0x6368616c6c656e6765456e64 // "challengeEnd"
-	app_global_get
-	int 0
-	==
-	assert
-
-	// contracts/Challenge.algo.ts:57
-	// this.challengeEnd.value = 86_400 * length + globals.latestTimestamp
-	byte 0x6368616c6c656e6765456e64 // "challengeEnd"
-	int 86_400
-	frame_dig -1 // length: uint64
-	*
-	global LatestTimestamp
-	+
-	app_global_put
-
-	// contracts/Challenge.algo.ts:60
-	// this.challengeBox(globals.creatorAddress).value = { assetId: assetId, given: given }
-	byte 0x6362 // "cb"
-	global CreatorAddress
-	concat
-	frame_dig -3 // assetId: AssetID
-	itob
-	frame_dig -2 // given: uint64
-	itob
-	concat
-	box_put
-	retsub
-
-// participate(pay,uint64)void
-*abi_route_participate:
-	// prediction: uint64
 	txna ApplicationArgs 1
 	btoi
 
@@ -712,28 +551,40 @@ startChallenge:
 	==
 	assert
 
-	// execute participate(pay,uint64)void
-	callsub participate
+	// execute createChallenge(pay,uint64,uint64,uint64)void
+	callsub createChallenge
 	int 1
 	return
 
-// participate(payment: PayTxn, prediction: uint64): void
-participate:
-	proto 2 0
+// createChallenge(payment: PayTxn, length: uint64, given: uint64, playerId: uint64): void
+createChallenge:
+	proto 4 0
 
-	// contracts/Challenge.algo.ts:65
-	// assert(globals.latestTimestamp < this.challengeEnd.value)
-	global LatestTimestamp
-	byte 0x6368616c6c656e6765456e64 // "challengeEnd"
+	// contracts/TikiTaka360.algo.ts:112
+	// assert(!this.challengeBox(playerId).exists)
+	byte 0x6362 // "cb"
+	frame_dig -4 // playerId: uint64
+	itob
+	concat
+	box_len
+	swap
+	pop
+	!
+	assert
+
+	// contracts/TikiTaka360.algo.ts:115
+	// assert(this.challengeIndex.value < 5)
+	byte 0x6368616c6c656e6765496e646578 // "challengeIndex"
 	app_global_get
+	int 5
 	<
 	assert
 
-	// contracts/Challenge.algo.ts:68
+	// contracts/TikiTaka360.algo.ts:118
 	// verifyPayTxn(payment, {
 	//       sender: this.txn.sender,
-	//       receiver: globals.creatorAddress,
-	//       amount: participationFee + oppBoxMbr,
+	//       receiver: this.app.address,
+	//       amount: challengeBoxMbr + extraFee,
 	//     })
 	// verify sender
 	frame_dig -1 // payment: PayTxn
@@ -745,171 +596,189 @@ participate:
 	// verify receiver
 	frame_dig -1 // payment: PayTxn
 	gtxns Receiver
-	global CreatorAddress
+	global CurrentApplicationAddress
 	==
 	assert
 
 	// verify amount
 	frame_dig -1 // payment: PayTxn
 	gtxns Amount
-	int 40000
+	int 100000
 	==
 	assert
 
-	// contracts/Challenge.algo.ts:75
-	// this.assessment(this.txn.sender).value = prediction
-	txn Sender
-	byte 0x7561 // "ua"
-	frame_dig -2 // prediction: uint64
-	app_local_put
-
-	// *if0_condition
-	// contracts/Challenge.algo.ts:78
-	// prediction === this.challengeBox(globals.creatorAddress).value.given
-	frame_dig -2 // prediction: uint64
-	int 8 // headOffset
-	int 8
+	// contracts/TikiTaka360.algo.ts:129
+	// this.challengeBox(playerId).value = {
+	//       creator: this.txn.sender,
+	//       given: given,
+	//       end: 86_400 * length + globals.latestTimestamp,
+	//     }
 	byte 0x6362 // "cb"
-	global CreatorAddress
+	frame_dig -4 // playerId: uint64
+	itob
 	concat
-	cover 2
-	box_extract
-	btoi
-	==
-	bz *if0_end
-
-	// *if0_consequent
-	// contracts/Challenge.algo.ts:79
-	// this.winnerBoxes(this.winnerIndex.value).value = { address: this.txn.sender, prediction: prediction }
-	byte 0x776e72 // "wnr"
-	byte 0x77696e6e6572496e646578 // "winnerIndex"
-	app_global_get
+	frame_dig -3 // given: uint64
+	itob
+	int 86_400
+	frame_dig -2 // length: uint64
+	*
+	global LatestTimestamp
+	+
 	itob
 	concat
 	txn Sender
-	frame_dig -2 // prediction: uint64
-	itob
 	concat
 	box_put
 
-	// contracts/Challenge.algo.ts:81
-	// this.winnerIndex.value = this.winnerIndex.value + 1
-	byte 0x77696e6e6572496e646578 // "winnerIndex"
-	dup
-	app_global_get
+	// contracts/TikiTaka360.algo.ts:136
+	// this.challengeIndex.value = 1 + this.challengeIndex.value
+	byte 0x6368616c6c656e6765496e646578 // "challengeIndex"
 	int 1
+	byte 0x6368616c6c656e6765496e646578 // "challengeIndex"
+	app_global_get
 	+
 	app_global_put
-
-*if0_end:
 	retsub
 
-// endChallenge()uint64
-*abi_route_endChallenge:
-	// The ABI return prefix
-	byte 0x151f7c75
+// participate(pay,uint64,uint64)void
+*abi_route_participate:
+	// prediction: uint64
+	txna ApplicationArgs 2
+	btoi
 
-	// execute endChallenge()uint64
-	callsub endChallenge
-	itob
-	concat
-	log
+	// playerId: uint64
+	txna ApplicationArgs 1
+	btoi
+
+	// payment: pay
+	txn GroupIndex
 	int 1
-	return
-
-// endChallenge(): uint64
-endChallenge:
-	proto 0 1
-
-	// Push empty bytes after the frame pointer to reserve space for local variables
-	byte 0x
-	dupn 3
-
-	// contracts/Challenge.algo.ts:86
-	// verifyAppCallTxn(this.txn, { sender: globals.creatorAddress })
-	// verify sender
-	txn Sender
-	global CreatorAddress
+	-
+	dup
+	gtxns TypeEnum
+	int pay
 	==
 	assert
 
-	// contracts/Challenge.algo.ts:92
-	// for (let i: uint64 = 0; i < this.winnerIndex.value; i = i + 1)
-	int 0
-	frame_bury 0 // i: uint64
+	// execute participate(pay,uint64,uint64)void
+	callsub participate
+	int 1
+	return
 
-*for_0:
-	// contracts/Challenge.algo.ts:92
-	// i < this.winnerIndex.value
-	frame_dig 0 // i: uint64
-	byte 0x77696e6e6572496e646578 // "winnerIndex"
-	app_global_get
-	<
-	bz *for_0_end
+// participate(payment: PayTxn, playerId: uint64, prediction: uint64): void
+participate:
+	proto 3 0
 
-	// contracts/Challenge.algo.ts:93
-	// winner = this.winnerBoxes(i).value.address
-	int 0
-	int 32
-	byte 0x776e72 // "wnr"
-	frame_dig 0 // i: uint64
+	// contracts/TikiTaka360.algo.ts:141
+	// assert(this.challengeBox(playerId).exists)
+	byte 0x6362 // "cb"
+	frame_dig -2 // playerId: uint64
 	itob
-	concat
-	cover 2
-	box_extract
-	frame_bury 1 // winner: address
-
-	// *if1_condition
-	// contracts/Challenge.algo.ts:95
-	// this.scoreBox(winner).exists
-	byte 0x7362 // "sb"
-	frame_dig 1 // winner: address
 	concat
 	box_len
 	swap
 	pop
+	assert
+
+	// *if0_condition
+	// contracts/TikiTaka360.algo.ts:144
+	// !this.scoreBox(this.txn.sender).exists
+	byte 0x7362 // "sb"
+	txn Sender
+	concat
+	box_len
+	swap
+	pop
+	!
+	bz *if0_end
+
+	// *if0_consequent
+	// contracts/TikiTaka360.algo.ts:145
+	// this.createScoreBox(this.txn.sender)
+	txn Sender
+	callsub createScoreBox
+
+*if0_end:
+	// contracts/TikiTaka360.algo.ts:149
+	// verifyPayTxn(payment, {
+	//       sender: this.txn.sender,
+	//       receiver: this.app.address,
+	//       amount: 2 * scoreBoxMbr,
+	//     })
+	// verify sender
+	frame_dig -1 // payment: PayTxn
+	gtxns Sender
+	txn Sender
+	==
+	assert
+
+	// verify receiver
+	frame_dig -1 // payment: PayTxn
+	gtxns Receiver
+	global CurrentApplicationAddress
+	==
+	assert
+
+	// verify amount
+	frame_dig -1 // payment: PayTxn
+	gtxns Amount
+	int 43400
+	==
+	assert
+
+	// *if1_condition
+	// contracts/TikiTaka360.algo.ts:156
+	// this.challengeBox(playerId).value.given === prediction
+	int 0
+	int 8
+	byte 0x6362 // "cb"
+	frame_dig -2 // playerId: uint64
+	itob
+	concat
+	cover 2
+	box_extract
+	btoi
+	frame_dig -3 // prediction: uint64
+	==
 	bz *if1_end
 
 	// *if1_consequent
-	// contracts/Challenge.algo.ts:96
-	// sp = this.scoreBox(winner).value.scoutingPoints
-	int 0
-	int 8
-	byte 0x7362 // "sb"
-	frame_dig 1 // winner: address
-	concat
-	cover 2
-	box_extract
-	btoi
-	frame_bury 2 // sp: uint64
-
-	// contracts/Challenge.algo.ts:97
-	// cp = this.scoreBox(winner).value.challengePoints
-	int 8 // headOffset
-	int 8
-	byte 0x7362 // "sb"
-	frame_dig 1 // winner: address
-	concat
-	cover 2
-	box_extract
-	btoi
-	frame_bury 3 // cp: uint64
-
-	// contracts/Challenge.algo.ts:98
-	// this.updateScoreBox(winner, sp, 100 + cp)
+	// contracts/TikiTaka360.algo.ts:157
+	// this.updateScoreBox(this.txn.sender, 0, 100)
 	int 100
-	frame_dig 3 // cp: uint64
-	+
-	frame_dig 2 // sp: uint64
-	frame_dig 1 // winner: address
+	int 0
+	txn Sender
 	callsub updateScoreBox
 
 *if1_end:
+	retsub
+
+// collectScorePoints(pay)void
+*abi_route_collectScorePoints:
+	// payment: pay
+	txn GroupIndex
+	int 1
+	-
+	dup
+	gtxns TypeEnum
+	int pay
+	==
+	assert
+
+	// execute collectScorePoints(pay)void
+	callsub collectScorePoints
+	int 1
+	return
+
+// collectScorePoints(payment: PayTxn): void
+collectScorePoints:
+	proto 1 0
+
 	// *if2_condition
-	// contracts/Challenge.algo.ts:101
-	// !this.scoreBox(winner).exists
+	// contracts/TikiTaka360.algo.ts:163
+	// !this.scoreBox(this.txn.sender).exists
 	byte 0x7362 // "sb"
-	frame_dig 1 // winner: address
+	txn Sender
 	concat
 	box_len
 	swap
@@ -918,40 +787,250 @@ endChallenge:
 	bz *if2_end
 
 	// *if2_consequent
-	// contracts/Challenge.algo.ts:102
-	// this.scoreBox(winner).value = {
-	//           scoutingPoints: 0,
-	//           challengePoints: 100,
-	//         }
-	byte 0x7362 // "sb"
-	frame_dig 1 // winner: address
-	concat
-	byte 0x00000000000000000000000000000064
-	box_put
+	// contracts/TikiTaka360.algo.ts:164
+	// this.createScoreBox(this.txn.sender)
+	txn Sender
+	callsub createScoreBox
 
 *if2_end:
+	// contracts/TikiTaka360.algo.ts:167
+	// verifyPayTxn(payment, {
+	//       sender: this.txn.sender,
+	//       receiver: this.app.address,
+	//       amount: 2 * scoreBoxMbr,
+	//     })
+	// verify sender
+	frame_dig -1 // payment: PayTxn
+	gtxns Sender
+	txn Sender
+	==
+	assert
 
-*for_0_continue:
-	// contracts/Challenge.algo.ts:92
-	// i = i + 1
-	frame_dig 0 // i: uint64
+	// verify receiver
+	frame_dig -1 // payment: PayTxn
+	gtxns Receiver
+	global CurrentApplicationAddress
+	==
+	assert
+
+	// verify amount
+	frame_dig -1 // payment: PayTxn
+	gtxns Amount
+	int 43400
+	==
+	assert
+
+	// contracts/TikiTaka360.algo.ts:173
+	// this.updateScoreBox(this.txn.sender, 100, 0)
+	int 0
+	int 100
+	txn Sender
+	callsub updateScoreBox
+	retsub
+
+// readScoreBox(address)(uint64,uint64)
+*abi_route_readScoreBox:
+	// The ABI return prefix
+	byte 0x151f7c75
+
+	// address: address
+	txna ApplicationArgs 1
+	dup
+	len
+	int 32
+	==
+	assert
+
+	// execute readScoreBox(address)(uint64,uint64)
+	callsub readScoreBox
+	concat
+	log
 	int 1
-	+
-	frame_bury 0 // i: uint64
-	b *for_0
+	return
 
-*for_0_end:
-	// contracts/Challenge.algo.ts:110
-	// return this.winnerIndex.value;
-	byte 0x77696e6e6572496e646578 // "winnerIndex"
-	app_global_get
+// readScoreBox(address: Address): { sp: uint64; cp: uint64 }
+readScoreBox:
+	proto 1 1
+
+	// Push empty bytes after the frame pointer to reserve space for local variables
+	byte 0x
+	dup
+
+	// contracts/TikiTaka360.algo.ts:177
+	// assert(this.scoreBox(address).exists)
+	byte 0x7362 // "sb"
+	frame_dig -1 // address: Address
+	concat
+	box_len
+	swap
+	pop
+	assert
+
+	// contracts/TikiTaka360.algo.ts:178
+	// sp = this.scoreBox(address).value.scoutingPoints
+	int 0
+	int 8
+	byte 0x7362 // "sb"
+	frame_dig -1 // address: Address
+	concat
+	cover 2
+	box_extract
+	btoi
+	frame_bury 0 // sp: uint64
+
+	// contracts/TikiTaka360.algo.ts:179
+	// cp = this.scoreBox(address).value.challengePoints
+	int 8 // headOffset
+	int 8
+	byte 0x7362 // "sb"
+	frame_dig -1 // address: Address
+	concat
+	cover 2
+	box_extract
+	btoi
+	frame_bury 1 // cp: uint64
+
+	// contracts/TikiTaka360.algo.ts:180
+	// return { sp: sp, cp: cp };
+	frame_dig 0 // sp: uint64
+	itob
+	frame_dig 1 // cp: uint64
+	itob
+	concat
 
 	// set the subroutine return value
 	frame_bury 0
 
 	// pop all local variables from the stack
-	popn 3
+	popn 1
 	retsub
+
+// removeChallengeBox(uint64)void
+*abi_route_removeChallengeBox:
+	// playerId: uint64
+	txna ApplicationArgs 1
+	btoi
+
+	// execute removeChallengeBox(uint64)void
+	callsub removeChallengeBox
+	int 1
+	return
+
+// removeChallengeBox(playerId: uint64): void
+removeChallengeBox:
+	proto 1 0
+
+	// contracts/TikiTaka360.algo.ts:184
+	// sendPayment({
+	//       receiver: this.challengeBox(playerId).value.creator,
+	//       amount: challengeBoxMbr,
+	//       fee: 1_000,
+	//     })
+	itxn_begin
+	int pay
+	itxn_field TypeEnum
+
+	// contracts/TikiTaka360.algo.ts:185
+	// receiver: this.challengeBox(playerId).value.creator
+	int 16 // headOffset
+	int 32
+	byte 0x6362 // "cb"
+	frame_dig -1 // playerId: uint64
+	itob
+	concat
+	cover 2
+	box_extract
+	itxn_field Receiver
+
+	// contracts/TikiTaka360.algo.ts:186
+	// amount: challengeBoxMbr
+	int 24900
+	itxn_field Amount
+
+	// contracts/TikiTaka360.algo.ts:187
+	// fee: 1_000
+	int 1_000
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+
+	// contracts/TikiTaka360.algo.ts:190
+	// this.challengeBox(playerId).delete()
+	byte 0x6362 // "cb"
+	frame_dig -1 // playerId: uint64
+	itob
+	concat
+	box_del
+
+	// contracts/TikiTaka360.algo.ts:191
+	// this.challengeIndex.value = this.challengeIndex.value - 1
+	byte 0x6368616c6c656e6765496e646578 // "challengeIndex"
+	dup
+	app_global_get
+	int 1
+	-
+	app_global_put
+	retsub
+
+// removeScoreBox(address)void
+*abi_route_removeScoreBox:
+	// address: address
+	txna ApplicationArgs 1
+	dup
+	len
+	int 32
+	==
+	assert
+
+	// execute removeScoreBox(address)void
+	callsub removeScoreBox
+	int 1
+	return
+
+// removeScoreBox(address: Address): void
+removeScoreBox:
+	proto 1 0
+
+	// contracts/TikiTaka360.algo.ts:195
+	// sendPayment({
+	//       receiver: address,
+	//       amount: scoreBoxMbr,
+	//       fee: 1_000,
+	//     })
+	itxn_begin
+	int pay
+	itxn_field TypeEnum
+
+	// contracts/TikiTaka360.algo.ts:196
+	// receiver: address
+	frame_dig -1 // address: Address
+	itxn_field Receiver
+
+	// contracts/TikiTaka360.algo.ts:197
+	// amount: scoreBoxMbr
+	int 21700
+	itxn_field Amount
+
+	// contracts/TikiTaka360.algo.ts:198
+	// fee: 1_000
+	int 1_000
+	itxn_field Fee
+
+	// Submit inner transaction
+	itxn_submit
+
+	// contracts/TikiTaka360.algo.ts:201
+	// this.scoreBox(address).delete()
+	byte 0x7362 // "sb"
+	frame_dig -1 // address: Address
+	concat
+	box_del
+	retsub
+
+*abi_route_createApplication:
+	int 1
+	return
 
 *create_NoOp:
 	method "createApplication()void"
@@ -963,18 +1042,13 @@ endChallenge:
 	method "bootstrap()uint64"
 	method "mintAndGetApp(string,string,string,address,address,uint64)uint64"
 	method "fundFactoryApp(address,uint64,uint64)void"
-	method "createScoreBox()void"
 	method "updateScoreBox(address,uint64,uint64)void"
-	method "optInToApplication()void"
-	method "startChallenge(uint64,uint64,uint64)void"
-	method "participate(pay,uint64)void"
-	method "endChallenge()uint64"
+	method "createChallenge(pay,uint64,uint64,uint64)void"
+	method "participate(pay,uint64,uint64)void"
+	method "collectScorePoints(pay)void"
+	method "readScoreBox(address)(uint64,uint64)"
+	method "removeChallengeBox(uint64)void"
+	method "removeScoreBox(address)void"
 	txna ApplicationArgs 0
-	match *abi_route_bootstrap *abi_route_mintAndGetApp *abi_route_fundFactoryApp *abi_route_createScoreBox *abi_route_updateScoreBox *abi_route_optInToApplication *abi_route_startChallenge *abi_route_participate *abi_route_endChallenge
-	err
-
-*call_OptIn:
-	method "optInToApplication()void"
-	txna ApplicationArgs 0
-	match *abi_route_optInToApplication
+	match *abi_route_bootstrap *abi_route_mintAndGetApp *abi_route_fundFactoryApp *abi_route_updateScoreBox *abi_route_createChallenge *abi_route_participate *abi_route_collectScorePoints *abi_route_readScoreBox *abi_route_removeChallengeBox *abi_route_removeScoreBox
 	err

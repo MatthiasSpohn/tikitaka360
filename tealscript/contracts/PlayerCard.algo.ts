@@ -1,6 +1,7 @@
 import { Contract } from '@algorandfoundation/tealscript';
 
-class PlayerCard extends Contract {
+// eslint-disable-next-line no-unused-vars
+export class PlayerCard extends Contract {
   globalReview = GlobalStateKey<uint64>({ key: 'r' });
 
   reviewCount = GlobalStateKey<uint64>({ key: 'c' });
@@ -127,102 +128,5 @@ class PlayerCard extends Contract {
       assetAmount: 1,
       assetReceiver: this.txn.sender,
     });
-  }
-}
-
-// const spBoxMbr = 2_500 + 40 * 400; // 18500 MicoAlgo
-// uint64 = 8 byte
-// Address = 32 byte array
-type Points = { scoutingPoints: uint64; challengePoints: uint64 };
-
-// eslint-disable-next-line no-unused-vars
-export class PlayerCardCaller extends Contract {
-  scoreBox = BoxMap<Address, Points>({ prefix: 'sb' });
-
-  tokenID = GlobalStateKey<AssetID>();
-
-  bootstrap(): AssetID {
-    verifyTxn(this.txn, { sender: this.app.creator });
-    assert(!this.tokenID.exists);
-    const registeredAsa = sendAssetCreation({
-      configAssetName: 'TikiTaka360-Token',
-      configAssetUnitName: 'TT360',
-      configAssetTotal: 10_000_000_000,
-      configAssetDecimals: 2,
-      configAssetManager: this.app.address,
-      configAssetFreeze: this.app.address,
-      configAssetClawback: this.app.address,
-      configAssetReserve: this.app.address,
-    });
-    this.tokenID.value = registeredAsa;
-    return registeredAsa;
-  }
-
-  mintAndGetApp(
-    name: string,
-    unitName: string,
-    url: string,
-    manager: Address,
-    reserve: Address,
-    total: uint64
-  ): uint64 {
-    sendMethodCall<typeof PlayerCard.prototype.createApplication>({
-      clearStateProgram: PlayerCard.clearProgram(),
-      approvalProgram: PlayerCard.approvalProgram(),
-      globalNumUint: 5,
-      localNumUint: 1,
-    });
-
-    const factoryApp: AppID = this.itxn.createdApplicationID;
-
-    sendPayment({
-      amount: 500_000,
-      receiver: factoryApp.address,
-    });
-
-    sendMethodCall<typeof PlayerCard.prototype.createNFT>({
-      applicationID: factoryApp,
-      methodArgs: [name, unitName, url, manager, reserve, total],
-    });
-
-    return factoryApp.id;
-  }
-
-  fundFactoryApp(address: Address, appid: uint64, amount: uint64): void {
-    sendMethodCall<typeof PlayerCard.prototype.optInToToken>({
-      applicationID: AppID.fromUint64(appid),
-      methodArgs: [this.tokenID.value],
-    });
-
-    // base amount: 50_050_000
-    sendAssetTransfer({
-      xferAsset: this.tokenID.value,
-      assetAmount: amount,
-      assetReceiver: address,
-    });
-  }
-
-  // the scouting- and challenge-points are saved in a box for each participant
-  createScoreBox() {
-    assert(this.txn.sender === this.app.address);
-    assert(!this.scoreBox(this.txn.sender).exists);
-
-    this.scoreBox(this.txn.sender).value = {
-      scoutingPoints: 0,
-      challengePoints: 0,
-    };
-  }
-
-  updateScoreBox(address: Address, sp: uint64, cp: uint64) {
-    assert(this.txn.sender === this.app.address);
-    assert(this.scoreBox(address).exists);
-
-    const currentScoutingPoints = this.scoreBox(address).value.scoutingPoints;
-    const currentChallengePoints = this.scoreBox(address).value.challengePoints;
-
-    this.scoreBox(address).value = {
-      scoutingPoints: currentScoutingPoints + sp,
-      challengePoints: currentChallengePoints + cp,
-    };
   }
 }

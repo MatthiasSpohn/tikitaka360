@@ -1,5 +1,5 @@
 {
-  "name": "Challenge",
+  "name": "TikiTaka360",
   "desc": "",
   "methods": [
     {
@@ -62,13 +62,6 @@
       }
     },
     {
-      "name": "createScoreBox",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
       "name": "updateScoreBox",
       "args": [
         {
@@ -89,22 +82,12 @@
       }
     },
     {
-      "name": "createApplication",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "optInToApplication",
-      "args": [],
-      "returns": {
-        "type": "void"
-      }
-    },
-    {
-      "name": "startChallenge",
+      "name": "createChallenge",
       "args": [
+        {
+          "name": "payment",
+          "type": "pay"
+        },
         {
           "name": "length",
           "type": "uint64"
@@ -114,7 +97,7 @@
           "type": "uint64"
         },
         {
-          "name": "assetId",
+          "name": "playerId",
           "type": "uint64"
         }
       ],
@@ -130,6 +113,10 @@
           "type": "pay"
         },
         {
+          "name": "playerId",
+          "type": "uint64"
+        },
+        {
           "name": "prediction",
           "type": "uint64"
         }
@@ -139,10 +126,58 @@
       }
     },
     {
-      "name": "endChallenge",
+      "name": "collectScorePoints",
+      "args": [
+        {
+          "name": "payment",
+          "type": "pay"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "readScoreBox",
+      "args": [
+        {
+          "name": "address",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "(uint64,uint64)"
+      }
+    },
+    {
+      "name": "removeChallengeBox",
+      "args": [
+        {
+          "name": "playerId",
+          "type": "uint64"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "removeScoreBox",
+      "args": [
+        {
+          "name": "address",
+          "type": "address"
+        }
+      ],
+      "returns": {
+        "type": "void"
+      }
+    },
+    {
+      "name": "createApplication",
       "args": [],
       "returns": {
-        "type": "uint64"
+        "type": "void"
       }
     }
   ]
